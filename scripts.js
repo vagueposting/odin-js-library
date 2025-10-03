@@ -17,29 +17,28 @@ function loadBookIntoShelf(book) {
     const bookItem = document.createElement("div");
     bookItem.classList.add("bookItem");
 
-    /* Create */
     for (const [key, value] of Object.entries(book)) {
-    if (value !== null && value !== undefined) {
-        bookItem.dataset[key] = value;
-    }}
-    const data = bookItem.dataset
+        if (key != 'id' && value !== null && value !== undefined) {
+            const infoKey = document.createElement("span");
+            const infoValue = document.createElement("span");
+            const lineBreak = document.createElement("br");
+            
+            const displayKey = key
+                .replace(/([A-Z])/g, ' $1') // Adds a space before capital letters
+                .replace(/^./, str => str.toUpperCase()); // Capitalizes the first letter
+            
+            infoKey.textContent = `${displayKey}: `;
+            infoValue.textContent = `${value}`;
 
-    for (const [key, value] of Object.entries(data)) {
-        const infoKey = document.createElement("span");
-        const infoValue = document.createElement("span");
-        const lineBreak = document.createElement("br");
-        
-        const displayKey = key
-            .replace(/([A-Z])/g, ' $1') // Adds a space before capital letters
-            .replace(/^./, str => str.toUpperCase()); // Capitalizes the first letter
-        
-        infoKey.textContent = `${displayKey}: `;
-        infoValue.textContent = `${value}`;
-
-        bookItem.appendChild(infoKey);
-        bookItem.appendChild(infoValue);
-        bookItem.appendChild(lineBreak);
+            bookItem.appendChild(infoKey);
+            bookItem.appendChild(infoValue);
+            bookItem.appendChild(lineBreak);
+        } else if (key === 'id') {
+            bookItem.dataset[key] = value;
+        }
     }
+
+    // TODO: refactor the ID assignment
 
     container.appendChild(bookItem);
 };
@@ -48,4 +47,10 @@ addBookToLibrary("Moby Dick",
     "Herman Melville", 544, false
 );
 
-loadBookIntoShelf(myBooks[0])
+addBookToLibrary("Wuthering Heights",
+    "Emily Brontë", 416, true
+)
+
+myBooks.forEach((book) => {
+    loadBookIntoShelf(book);
+});
