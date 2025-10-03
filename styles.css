@@ -1,3 +1,5 @@
+/* HTML reset by Josh Comeau */
+
 /* 1. Use a more-intuitive box-sizing model */
 *, *::before, *::after {
   box-sizing: border-box;
