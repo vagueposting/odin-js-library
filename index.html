@@ -4,10 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css">
+    <link
+	rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/@radix-ui/colors@latest/gray.css"
+    />
     <script src="scripts.js" defer></script>
     <title>Document</title>
 </head>
 <body>
-    <p>I'm Alexandria, and this is Jackass.</p>
+    <div class="sidebar">
+        <h1>My Library</h1>
+        <p><span class="welcomeMSG">Welcome to the library!</span> Here you'll find a collection of books you've read, or intend to read.</p>
+
+        <button id="addBook">Add Book</button>
+
+        <h1>Stats</h1>
+        <ul>
+            <li>Number of books: <span id="bookCount"></span></li>
+        </ul>
+    </div>
+
+    <div class="bookshelf"></div>
 </body>
 </html>
