@@ -1,3 +1,22 @@
+@import url(https://fonts.bunny.net/css?family=libre-baskerville:400,700|noto-sans:300,300i,600,900|space-mono:400,700);
+
+:root {
+  font-size: 12pt;
+  font-family: 'Noto Sans', sans-serif;
+
+  /* Variables */
+
+  --01: #ecf0f1;
+  --02: #bdc3c7;
+  --03: #95a5a6;
+  --04: #7f8c8d;
+  --05: #34495e;
+  --06: #2c3e50;
+
+  --red-01: #e74c3c;
+  --red-02: #c0392b;
+}
+
 /* HTML reset by Josh Comeau */
 
 /* 1. Use a more-intuitive box-sizing model */
@@ -17,11 +36,22 @@
   }
 }
 
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   /* 4. Add accessible line-height */
   line-height: 1.5;
   /* 5. Improve text rendering */
   -webkit-font-smoothing: antialiased;
+
+  /* Alterations */
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+
+  height: 100vh;
 }
 
 /* 6. Improve media defaults */
@@ -53,4 +83,237 @@ h1, h2, h3, h4, h5, h6 {
 */
 #root, #__next {
   isolation: isolate;
+}
+
+/* Custom styles incoming! */
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+
+  background-color: transparent;
+  color: var(--06);
+  z-index: 5;
+
+  background-image:
+    linear-gradient(180deg, 
+      rgba(195, 194, 192, 1) 20%, 
+      rgba(175, 173, 172, 1) 34%, 
+      rgba(227, 224, 219, 1) 42%, 
+      rgba(118, 116, 114, 1) 45%, 
+      rgba(175, 173, 172, 1) 48%, 
+      rgba(195, 194, 192, 1) 70%
+    ),
+    url('img/leather.png');
+    
+  background-size: 
+    8px 100%, 
+    500px 500px; 
+
+  background-repeat: 
+    no-repeat, 
+    repeat;
+
+  background-position: 
+    right center, 
+    0 0;
+
+  box-shadow: 
+    10px 0px 20px rgba(0,0,0,0.4),
+    inset -8px 0 0 rgb(255, 255, 255, 0.1),
+    inset -13px 0 6px rgba(0, 0, 0, 0.2);
+
+  padding: 1rem 1.5rem;
+
+  text-shadow: 2px 1px 2px 
+    rgba(85, 85, 85, 0.75);
+}
+
+.sidebar h1 {
+  text-align: center;
+  font-family: 'Libre Baskerville', serif;
+  font-variant:small-caps;
+}
+
+.sidebar button {
+  /* Reset/Base Styles */
+  border: 1px solid #7c7c7c; /* Darker border for depth */
+  border-radius: 8px; /* Classic rounded corners */
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  color: white;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.4); /* Subtle drop shadow on text */
+  text-align: center;
+  
+  /* Primary 3D and Gloss Effect (Skeuomorphism) */
+  background-color: #007aff; /* Standard Apple Blue */
+  background-image: linear-gradient(
+    to bottom, 
+    #5cacee 0%,    /* Top: Lighter color for high gloss */
+    #007aff 50%,   /* Middle: Main button color */
+    #005bb7 100%   /* Bottom: Darker color for depth/shadow */
+  );
+  
+  /* Inner Shadow for the "Protruding" look */
+  /* This creates a bright, soft highlight inside the top edge */
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.4), /* Inner Top Highlight (The sheen) */
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2);     /* Inner Bottom Shadow */
+    
+  /* Outer Shadow for general 3D appearance on the page */
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
+  
+  /* Smooth transition for active/hover states */
+  transition: all 0.08s ease-out;
+}
+
+/* Active state for the "press" effect (crucial for this style) */
+.sidebar button:active {
+  /* Reverse the gradient to simulate light shifting as it presses */
+  background-image: linear-gradient(
+    to bottom, 
+    #005bb7 0%,    /* Now dark at the top */
+    #007aff 50%,
+    #5cacee 100%   /* Now light at the bottom */
+  );
+  
+  /* Remove the main outer shadow and move it down to simulate press */
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.4), 
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+    0 1px 1px rgba(0, 0, 0, 0.3); /* Smaller, lower outer shadow */
+    
+  /* Visually push the content down slightly */
+  transform: translateY(1px);
+}
+
+.sidebar ul {
+  margin-top: -1.5rem;
+  margin-left: -8rem;
+  font-weight: 700;
+  font-family: 'Space Mono', monospace;
+}
+
+.sidebar ul span {
+  font-weight: 300;
+}
+
+.bookshelf {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: minmax(min-content, max-content);
+  gap: 2rem;
+
+  padding: 2rem;
+  min-height: 0;
+  height: 100%;
+  overflow-y: auto;
+
+  background-image: url('img/cork.jpeg');
+  background-size: 300px 300px;
+  background-repeat: repeat;
+}
+
+.bookItem {
+  --card-color: #fcfcf4;
+  --radius: 5px;
+  --elevation: 10px;
+  --bevel: 1.4px;
+  --angle: 220deg;
+  --intensity: 38;
+  --diffusion: 12;
+
+  --sin: calc(sin(var(--angle)));
+  --cos: calc(cos(var(--angle)));
+  --x-displacement: calc(-1 * var(--cos) * (var(--elevation) + 1px));
+  --y-displacement: calc(-1 * var(--sin) * (var(--elevation) + 1px));
+  --edge-opacity: calc(var(--intensity) * 0.006 - var(--diffusion) * 0.002);
+  --edge-blur: calc(var(--bevel) * 1.5);
+  --surface-contrast: calc(var(--intensity) * 0.01 - var(--diffusion) * 0.005);
+  
+  border: 1px solid #ccc;
+  border-radius: var(--radius);
+  background-color: var(--card-color);
+  position: relative;
+
+  box-shadow: 
+    var(--x-displacement) var(--y-displacement) calc(var(--diffusion) * 0.3px + (var(--elevation))) calc(var(--elevation) / 2) rgba(0, 0, 0, calc(var(--intensity) * 0.006)),
+    0px 0px calc(var(--diffusion) * 1.4px) rgba(255, 255, 255, calc(var(--intensity) * 0.004)),
+    inset calc(var(--bevel) * -1) 0 var(--edge-blur) hsla(100, 0%, calc((var(--cos) + 1) * 50%), var(--edge-opacity)),
+    inset 0 var(--bevel) var(--edge-blur) hsla(100, 0%, calc((-1 * var(--sin) + 1) * 50%), var(--edge-opacity)),
+    inset var(--bevel) 0 var(--edge-blur) hsla(100, 0%, calc((-1 * var(--cos) + 1) * 50%), var(--edge-opacity)),
+    inset 0 calc(var(--bevel) * -1) var(--edge-blur) hsla(100, 0%, calc((var(--sin) + 1) * 50%), var(--edge-opacity));
+
+  background-image:
+    url('img/paper-texture.png'),
+    linear-gradient(
+      calc(var(--angle) + 90deg),
+      rgba(0, 0, 0, var(--surface-contrast)),
+      rgba(255, 255, 255, var(--surface-contrast))
+    ),
+    linear-gradient(to bottom, 
+      #d05050 0, 
+      #d05050 8px, 
+      transparent 8px, 
+      transparent 1.5rem),
+    repeating-linear-gradient(to bottom, 
+      transparent 0, 
+      transparent 1.5em, 
+      #a0a0c0 1.5em, 
+      #a0a0c0 calc(1.5em + 1px)),
+    linear-gradient(to bottom, var(--card-color), var(--card-color));
+
+  background-repeat: 
+    repeat, no-repeat, no-repeat, repeat-y, no-repeat;
+    
+  background-position: 
+    0 0, 0 0, top left, 0 1.5rem, 0 0;
+    
+  background-clip: 
+    border-box, border-box, padding-box, padding-box, border-box;
+
+  background-blend-mode: 
+    multiply, soft-light, normal, normal, normal;
+
+  transform: rotate(var(--rand-rot, 0deg));
+  
+  padding: 1.5rem;
+  align-self: start; 
+  min-height: 10rem;
+  max-height: 15rem;
+  overflow-y: auto; 
+
+  line-height: 1.60;
+}
+
+.bookItem::before {
+  content: '';
+  display: block;
+  width: 15px;
+  height: 15px;
+  border-radius: 103px;
+  background-color: #25231e;
+  box-shadow: 1px 2px 2px rgba(100, 84, 84, 0.4);
+  position: absolute;
+  top: 7.5%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 95%;
+  z-index: 10;
+}
+
+.bookInfoHeader, .welcomeMSG {
+  font-weight: 600;
+}
+
+.bookInfoHeader {
+  font-family: 'Space Mono', monospace;
+}
+
+.bookTitle {
+  font-style: italic;
 }
