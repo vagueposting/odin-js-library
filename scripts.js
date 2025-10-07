@@ -1,5 +1,9 @@
 let myBooks = [];
-const bookCount = document.querySelector("#bookCount");
+const bookCount = document.querySelector('#bookCount'),
+    pageCount = document.querySelector('#pageCount'),
+    averagePages = document.querySelector('#averagePages'),
+    uniqueAuthors = document.querySelector('#uniqueAuthors');
+
 
 function Book(title, author, pages, readStatus) {
     this.title = title;
@@ -60,11 +64,31 @@ function loadBookIntoShelf(book) {
     };
 
     container.appendChild(bookItem);
-    updateBookCount(myBooks)
+    updateBookStats(myBooks)
 };
 
-function updateBookCount(library) {
+function updateBookStats(library) {
+    /* Compute page count */
+    if (library.length > 0) {
+    const pagesPerBook = library.map(item => item.pages);
+    const totalPages = pagesPerBook.reduce((accumulator, currentValue) =>
+        accumulator + currentValue);
+    const averagePagesValue = totalPages / library.length;
+    /* Compute unique authors */
+    const uniqueAuthorSet = new Set(
+        library.map(item => item.author));
+
+    /* Set stat values */
     bookCount.textContent = `${library.length}`;
+    pageCount.textContent = `${totalPages} pages`
+    averagePages.textContent = `${Math.round(averagePagesValue)} pages/book`
+    uniqueAuthors.textContent = `${uniqueAuthorSet.size} authors`
+    } else {
+        bookCount.textContent = `0`;
+    pageCount.textContent = `0`
+    averagePages.textContent = `0`
+    uniqueAuthors.textContent = `0`
+    }
 }
 
 function getRandomRotation(min, max) {
@@ -75,11 +99,11 @@ function getRandomRotation(min, max) {
 
 // Test runs
 
-updateBookCount(myBooks);
+updateBookStats(myBooks);
 
-addBookToLibrary("Moby Dick",
+/*addBookToLibrary("Moby Dick",
     "Herman Melville", 544, false
-);
+);*/
 
 addBookToLibrary("Wuthering Heights",
     "Emily Brontë", 416, true
