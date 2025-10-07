@@ -191,15 +191,60 @@ h1, h2, h3, h4, h5, h6 {
   transform: translateY(1px);
 }
 
-.sidebar ul {
-  margin-top: -1.5rem;
-  margin-left: -8rem;
-  font-weight: 700;
-  font-family: 'Space Mono', monospace;
+/* Table Style */
+/* Update your 'table' rule like this */
+.bookStats {
+  background-image: linear-gradient(
+    to bottom,
+    rgba(240, 171, 171, 0.2) 0%,
+    rgba(187, 111, 111, 0.248) 75%
+  ),
+    url('img/paper-texture.png');
+  background-size: 100%, 200px 200px;
+  background-repeat: no-repeat, repeat;
+  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5);
+  
+  padding: 20px 0 20px 0;
+
+  z-index: 12;
+
+  transform: rotate(-1.2deg);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
-.sidebar ul span {
-  font-weight: 300;
+table {
+  color: #333;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.9rem;
+  width: 300px;
+  border-collapse: collapse;
+  border-top: none; 
+  border-radius: 0 0 5px 5px;
+  position: relative;
+  overflow: hidden;
+  border-inline: 1px solid #612222;
+}
+
+th, td {
+    padding: 8px 15px;
+    border: none;
+    border-bottom: 1px dashed #612222; 
+    text-align: left;
+}
+
+td {
+    text-align: right;
+    font-weight: bold;
+}
+
+tr:last-child th, 
+tr:last-child td {
+    border-bottom: none;
+}
+
+table::before {
+    display: none;
 }
 
 .bookshelf {
