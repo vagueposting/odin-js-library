@@ -28,6 +28,8 @@ function loadBookIntoShelf(book) {
 
     bookItem.classList.add("bookItem")
     bookItem.style.setProperty('--rand-rot', rotationValue)
+    bookItem.style.setProperty('backface-visibility', 'hidden')
+    bookItem.style.setProperty('-webkit-backface-visibility', 'hidden')
 
     for (const [key, value] of Object.entries(book)) {
         if (key != 'id' && value !== null && value !== undefined) {
