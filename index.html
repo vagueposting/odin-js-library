@@ -14,11 +14,11 @@
 <body>
     <div class="sidebar">
         <h1>My Library</h1>
-        <p><span class="welcomeMSG">Welcome to the library!</span> Here you'll find a collection of books you've read, or intend to read.</p>
+        <p><span class="welcomeMSG">Welcome to the library!</span> Here you'll find a collection of books you've read, or intend to read. Click the button to add books to your collection!</p>
 
         <button id="addBook">Add Book</button>
 
-        <h1>Stats</h1>
+        <h1 style="position: relative; top: 3rem;">Stats</h1>
         <div class="bookStats">
         <table>
             <tr>
@@ -35,14 +35,18 @@
             </tr>
             <tr>
                 <th>Average book length</th>
-                <td><span id="averagePages"></span></td>
+                <td><span id="averagePages"></span> pg/book</td>
             </tr>
             <tr>
                 <th>Unique Authors</th>
-                <td><span id="uniqueAuthors"></span></td>
+                <td><span id="uniqueAuthors"></span> author/s</td>
             </tr>
         </table>
         </div>
+
+    <div class="creatorCredit">"My Library" by vagueposting<br/>
+    Created as part of The Odin Project curriculum.
+    </div>
     </div>
 
     <div class="bookshelf"></div>
