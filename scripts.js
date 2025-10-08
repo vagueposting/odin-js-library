@@ -82,9 +82,9 @@ function updateBookStats(library) {
 
     /* Set stat values */
     bookCount.textContent = `${library.length}`;
-    pageCount.textContent = `${totalPages} pages`
-    averagePages.textContent = `${Math.round(averagePagesValue)} pages/book`
-    uniqueAuthors.textContent = `${uniqueAuthorSet.size} authors`
+    pageCount.textContent = `${totalPages}`
+    averagePages.textContent = `${Math.round(averagePagesValue)}`
+    uniqueAuthors.textContent = `${uniqueAuthorSet.size}`
     } else {
         bookCount.textContent = `0`;
     pageCount.textContent = `0`
