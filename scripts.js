@@ -24,8 +24,26 @@ function addBookToLibrary(title, author, pages, readStatus) {
 };
 
 function loadBookIntoShelf(book) {
-    const container = document.querySelector(".bookshelf") // TODO: change to final assignment
-    const bookItem = document.createElement("div");
+    const container = document.querySelector(".bookshelf"),
+    bookItem = document.createElement("div");
+
+    const bookControls = document.createElement('div'),
+    deleteButton = document.createElement('button'),
+    changeBookInfoButton = document.createElement('button'),
+    trash = document.createElement('img'),
+    editBook = document.createElement('img');
+    bookControls.classList.add('bookControls');
+    trash.src = 'img/delete.svg';
+    editBook.src = 'img/book-edit.svg';
+    deleteButton.classList.add('bookControlButton');
+    changeBookInfoButton.classList.add('bookControlButton');
+    trash.style.height = '100%';
+    // deleteButton.textContent = 'text';
+
+    changeBookInfoButton.appendChild(editBook);
+    deleteButton.appendChild(trash);
+    bookControls.appendChild(changeBookInfoButton);
+    bookControls.appendChild(deleteButton)    
     
     const rotationValue = getRandomRotation(-2.5, 2.5)
     bookItem.classList.add("bookItem");
@@ -68,6 +86,7 @@ function loadBookIntoShelf(book) {
             bookItem.appendChild(infoKey);
             bookItem.appendChild(infoValue);
             bookItem.appendChild(lineBreak);
+            bookItem.appendChild(bookControls);
         };
     };
 
