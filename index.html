@@ -16,9 +16,8 @@
         <h1>My Library</h1>
         <p><span class="welcomeMSG">Welcome to the library!</span> Here you'll find a collection of books you've read, or intend to read. Click the button to add books to your collection!</p>
 
-        <button id="addBook">Add Book</button>
+        <button id="addBook"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 19C13 20.1 13.3 21.12 13.81 22H6C4.89 22 4 21.11 4 20V4C4 2.9 4.89 2 6 2H7V9L9.5 7.5L12 9V2H18C19.1 2 20 2.89 20 4V13.09C19.67 13.04 19.34 13 19 13C15.69 13 13 15.69 13 19M20 18V15H18V18H15V20H18V23H20V20H23V18H20Z" /></svg>Add Book</button>
 
-        <h1 style="position: relative; top: 3rem;">Stats</h1>
         <div class="bookStats">
         <table>
             <tr>
@@ -43,12 +42,58 @@
             </tr>
         </table>
         </div>
-
-    <div class="creatorCredit">"My Library" by vagueposting<br/>
-    Created as part of The Odin Project curriculum.
     </div>
+
+    <div id="addBookMenu" class="popupOverlay">
+        <form id="bookInputForm" class="popupContent">
+            <ul>
+                <li><label for="bookTitle">Title:</label>
+                    <input
+                    type="text"
+                    id="bookTitle"
+                    name="bookTitle"
+                    required
+                    minlength="1"
+                    maxlength="32"
+                    size="32" />
+                </li>
+                <li><label for="bookAuthor">Author:</label>
+                    <input
+                    type="text"
+                    id="bookAuthor"
+                    name="bookAuthor"
+                    required
+                    minlength="1"
+                    maxlength="32"
+                    size="32" />
+                </li>
+                <li><label for="bookPages">Page count:</label>
+                    <input
+                        type="number"
+                        id="bookPages"
+                        name="bookPages"
+                        required
+                        size="2" />
+                </li>
+                <li><label for="bookStatus">Read?</label>
+                    <input type="checkbox"
+                    id="bookStatus"
+                    name="bookStatus">
+                </li>
+            </ul>
+            <div class="popupControls">
+                <button id="closePopupBtn" class="popupButton">Close</button>
+                <button type="submit" id="submitBook" class="popupButton">Submit</button>
+            </div>
+        </form>
     </div>
 
     <div class="bookshelf"></div>
+
+    <footer class="woodenFooter">
+        <div class="creatorCredit">"My Library" by vagueposting<br/>
+    Created as part of The Odin Project curriculum.
+        </div>
+    </footer>
 </body>
 </html>

@@ -50,6 +50,7 @@ body {
   /* Alterations */
   display: grid;
   grid-template-columns: 1fr 3fr;
+  grid-template-rows: 1fr 80px;
 
   height: 100vh;
 }
@@ -87,39 +88,6 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Custom styles incoming! */
 
-/* ANIMATIONS */
-@keyframes sway {
-  /* Start at 0 degrees */
-  0% {
-    transform: rotate(0deg);
-    box-shadow: 4px 6px 10px rgba(0, 0, 0, 0.4);
-  }
-  
-  /* Sway to the right (1 degree) */
-  25% {
-    transform: rotate(1deg);
-    box-shadow: 8px 12px 12px rgba(0, 0, 0, 0.2)
-  }
-
-  /* Pass through the center */
-  50% {
-    transform: rotate(0deg);
-    box-shadow: 4px 6px 10px rgba(0, 0, 0, 0.4)
-  }
-
-  /* Sway to the left (-1 degree) */
-  75% {
-    transform: rotate(-1deg);
-    box-shadow: -8px 12px 12px rgba(0, 0, 0, 0.2);
-  }
-  
-  /* Return to center to complete the cycle */
-  100% {
-    transform: rotate(0deg);
-    box-shadow: 4px 6px 10px rgba(0, 0, 0, 0.4)
-  }
-}
-
 .sidebar {
   display: flex;
   flex-direction: column;
@@ -131,22 +99,12 @@ h1, h2, h3, h4, h5, h6 {
   z-index: 5;
 
   background-image:
-    linear-gradient(180deg, 
-      rgba(195, 194, 192, 1) 20%, 
-      rgba(175, 173, 172, 1) 34%, 
-      rgba(227, 224, 219, 1) 42%, 
-      rgba(118, 116, 114, 1) 45%, 
-      rgba(175, 173, 172, 1) 48%, 
-      rgba(195, 194, 192, 1) 70%
-    ),
     url('img/leather.png');
     
   background-size: 
-    8px 100%, 
     500px 500px; 
 
-  background-repeat: 
-    no-repeat, 
+  background-repeat:  
     repeat;
 
   background-position: 
@@ -155,10 +113,10 @@ h1, h2, h3, h4, h5, h6 {
 
   box-shadow: 
     10px 0px 20px rgba(0,0,0,0.4),
-    inset -8px 0 0 rgb(255, 255, 255, 0.1),
-    inset -13px 0 6px rgba(0, 0, 0, 0.2);
+    inset 2px 2px 5px rgba(255, 255, 255, 0.7),
+    inset -2px -2px 5px rgba(0, 0, 0, 0.3);
 
-  padding: 1rem calc(1.5rem + 8px) 1rem 1.5rem;
+  padding: 3rem calc(1.5rem + 8px) 1rem 1.5rem;
 
   text-shadow: 2px 1px 2px 
     rgba(85, 85, 85, 0.40);
@@ -178,36 +136,37 @@ h1, h2, h3, h4, h5, h6 {
 
 .sidebar button {
   /* Reset/Base Styles */
-  border: 1px solid #7c7c7c; /* Darker border for depth */
-  border-radius: 8px; /* Classic rounded corners */
+  border: 1px solid #7c7c7c; 
+  border-radius: 8px; 
   padding: 10px 20px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   color: white;
-  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.4); /* Subtle drop shadow on text */
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.4);
   text-align: center;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
   
   /* Primary 3D and Gloss Effect (Skeuomorphism) */
   background-color: #007aff; /* Standard Apple Blue */
   background-image: linear-gradient(
     to bottom, 
-    #5cacee 0%,    /* Top: Lighter color for high gloss */
-    #007aff 50%,   /* Middle: Main button color */
-    #005bb7 100%   /* Bottom: Darker color for depth/shadow */
+    #b2b6b9 0%,    
+    #84817e 50%,   
+    #57595b 100%   
   );
   
-  /* Inner Shadow for the "Protruding" look */
-  /* This creates a bright, soft highlight inside the top edge */
   box-shadow: 
     inset 0 1px 0 rgba(255, 255, 255, 0.4), /* Inner Top Highlight (The sheen) */
     inset 0 -1px 0 rgba(0, 0, 0, 0.2);     /* Inner Bottom Shadow */
     
-  /* Outer Shadow for general 3D appearance on the page */
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
   
-  /* Smooth transition for active/hover states */
-  transition: all 0.08s ease-out;
+  transition: all 0.5s ease-out;
 }
 
 /* Active state for the "press" effect (crucial for this style) */
@@ -215,9 +174,9 @@ h1, h2, h3, h4, h5, h6 {
   /* Reverse the gradient to simulate light shifting as it presses */
   background-image: linear-gradient(
     to bottom, 
-    #005bb7 0%,    /* Now dark at the top */
-    #007aff 50%,
-    #5cacee 100%   /* Now light at the bottom */
+    #57595b 0%,    /* Now dark at the top */
+    #84817e 50%,
+    #b2b6b9 100%   /* Now light at the bottom */
   );
   
   /* Remove the main outer shadow and move it down to simulate press */
@@ -230,33 +189,59 @@ h1, h2, h3, h4, h5, h6 {
   transform: translateY(1px);
 }
 
+.sidebar button svg {
+  fill: white;
+  height: 24px;
+  margin: 0;
+}
+
 /* Table Style */
 .bookStats {
   position: relative;
   top: 3rem;
-  background-image: linear-gradient(
-    to bottom,
-    rgba(240, 171, 171, 0.2) 0%,
-    rgba(187, 111, 111, 0.248) 75%
-  ),
-    url('img/paper-texture.png');
-  background-size: 100%, 200px 200px;
-  background-repeat: no-repeat, repeat;
+  left: calc(10% + 25px);
+  background-image:
+    linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.5) 0%, 
+      rgba(255, 255, 255, 0.5) 100%
+    ),
+    url('img/postit.png');
+  background-size: 200px 200px, 100%;
+  background-repeat: repeat, no-repeat;
+  box-shadow: -3px 5px 5px rgba(0,0,0,0.40);
   
   padding: 20px 0 20px 0;
+  transform: rotate(-2.5deg);
+  transform-origin: 0 -25px;
 
   z-index: 12;
 
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+}
 
-  transform-origin: 50% 20px; 
+.bookStats::before {
+  content: '';
+  background-image: url('img/binderClip.png');
+  display: block;
+  
+  position: absolute; 
+  width: 100px; 
+  height: 100px; 
+  
+  right: 0;
+  top: -25px;
+  margin-right: -20px;
+  transform: rotate(90deg);
+  filter: drop-shadow(5px 1px 2px rgba(0, 0, 0, 0.5));
+  
+  background-size: contain;
+  background-repeat: no-repeat;
 
-  animation-name: sway;
-  animation-duration: 10s;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
+  
 
+  z-index: 13;
 }
 
 table {
@@ -311,7 +296,68 @@ table::before {
   font-size: 0.80rem;
 }
 
+.popupOverlay {
+  display: none; 
+  position: fixed; 
+  z-index: 1000; 
+  left: 0;
+  top: 0;
+  width: 100%; 
+  height: 100%; 
+  overflow: auto; 
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.popupContent {
+  background-color: #fefefe;
+  margin: 15% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size */
+  max-width: 500px;
+  border-radius: 8px;
+  text-align: left;
+  position: relative;
+}
+
+.popupContent ul {
+  list-style: none;
+}
+
+.popupContent ul label {
+  font-weight: 600;
+  font-family: 'Space Mono', monospace;
+}
+
+.popupControls {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  user-select: none;
+  gap: 2rem;
+}
+
+.popupButton {
+  background: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+
+  font-family: 'Caveat Brush', handwriting;
+  font-size: 1.75rem;
+  transition: color 0.5s ease-in-out;
+}
+
+.popupButton:hover {
+  color: #d05050;
+}
+
+/* Bookshelf */
+
 .bookshelf {
+  grid-row: 1 / 2;
+  grid-column: 2 / 3;
+
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-auto-rows: minmax(min-content, max-content);
@@ -327,7 +373,7 @@ table::before {
   background-repeat: repeat;
 }
 
-.bookItem {
+.bookItem, .popupContent {
   --card-color: #fcfcf4;
   --radius: 5px;
   --elevation: 10px;
@@ -358,7 +404,7 @@ table::before {
     inset 0 calc(var(--bevel) * -1) var(--edge-blur) hsla(100, 0%, calc((var(--sin) + 1) * 50%), var(--edge-opacity));
 
   background-image:
-    url('img/paper-texture.png'),
+    url('img/index-tex.png'),
     linear-gradient(
       calc(var(--angle) + 90deg),
       rgba(0, 0, 0, var(--surface-contrast)),
@@ -389,17 +435,18 @@ table::before {
     multiply, soft-light, normal, normal, normal;
 
   transform: rotate(var(--rand-rot, 0deg)) translateZ(0);
-  
+}
+
+.bookItem {
   padding: 1.5rem;
   align-self: start; 
   min-height: 10rem;
   max-height: 15rem;
   overflow-y: auto; 
-
   line-height: 1.60;
 }
 
-.bookItem::before, .bookStats::before {
+.bookItem::before {
   content: '';
   display: block;
   width: 15px;
@@ -425,4 +472,34 @@ table::before {
 
 .bookTitle {
   font-style: italic;
+}
+
+.woodenFooter {
+  grid-column: 1 / 3;
+  grid-row: 2 / 3;
+  
+  width: 100%;
+  background-image: url('img/siding.png');
+  background-size: 100px 100px;
+  background-repeat: repeat;
+  
+  box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.3);
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  color: #fffcf7;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  padding: 10px 20px;
+  z-index: 100;
+}
+
+.creatorCredit {
+  position: static;
+  text-align: center;
+  left: auto;
+  bottom: auto;
+
+  font-size: 1.1rem;
 }

@@ -2,7 +2,13 @@ let myBooks = [];
 const bookCount = document.querySelector('#bookCount'),
     pageCount = document.querySelector('#pageCount'),
     averagePages = document.querySelector('#averagePages'),
-    uniqueAuthors = document.querySelector('#uniqueAuthors');
+    uniqueAuthors = document.querySelector('#uniqueAuthors'),
+    bookInputForm = document.querySelector('#bookInputForm'),
+    formBookTitle = document.querySelector('#bookTitle'),
+    formBookAuthor = document.querySelector('#bookAuthor'),
+    formBookPages = document.querySelector('#bookPages'),
+    formBookStatus = document.querySelector('#bookStatus'),
+    submitBookButton = document.querySelector('#submitBook');
 
 
 function Book(title, author, pages, readStatus) {
@@ -98,6 +104,51 @@ function getRandomRotation(min, max) {
     
     return `${rotation.toFixed(1)}deg`;
 }
+
+// Popup code
+
+document.addEventListener('DOMContentLoaded', function() {
+  const openPopupBtn = document.querySelector('#addBook'),
+  closePopupBtn = document.querySelector('#closePopupBtn'),
+  myPopup = document.querySelector('#addBookMenu');
+
+  openPopupBtn.addEventListener('click', function() {
+    myPopup.style.display = 'block';
+  });
+
+  closePopupBtn.addEventListener('click', function() {
+    myPopup.style.display = 'none';
+  });
+
+  // Optional: Close pop-up when clicking outside the content
+  window.addEventListener('click', function(event) {
+    if (event.target === myPopup) {
+      myPopup.style.display = 'none';
+    }
+  });
+});
+
+bookInputForm.addEventListener('submit', function(event) {
+    const inputForm = document.querySelector('#addBookMenu');
+
+    event.preventDefault();
+    submitBookButton.disabled = true; // Prevents doubled inputs!
+    
+    const title = formBookTitle.value,
+    author = formBookAuthor.value,
+    pages = Number(formBookPages.value),
+    readStatus = formBookStatus.value;
+
+    console.log(`Title: ${title}\n
+        Author: ${author}\n
+        Pages: ${pages}\n
+        Read? ${readStatus}`)
+
+    addBookToLibrary(title, author, pages, readStatus);
+    loadBookIntoShelf(myBooks[myBooks.length - 1])
+
+    inputForm.style.display = 'none';
+});
 
 // Test runs
 
