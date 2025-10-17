@@ -1,5 +1,6 @@
 let myBooks = [];
-const bookCount = document.querySelector('#bookCount'),
+const bookshelfContainer = document.querySelector('.bookshelf'),
+    bookCount = document.querySelector('#bookCount'),
     pageCount = document.querySelector('#pageCount'),
     averagePages = document.querySelector('#averagePages'),
     uniqueAuthors = document.querySelector('#uniqueAuthors'),
@@ -9,7 +10,6 @@ const bookCount = document.querySelector('#bookCount'),
     formBookPages = document.querySelector('#bookPages'),
     formBookStatus = document.querySelector('#bookStatus'),
     submitBookButton = document.querySelector('#submitBook');
-
 
 function Book(title, author, pages, readStatus) {
     this.title = title;
@@ -24,21 +24,22 @@ function addBookToLibrary(title, author, pages, readStatus) {
 };
 
 function loadBookIntoShelf(book) {
-    const container = document.querySelector(".bookshelf"),
-    bookItem = document.createElement("div");
+    const bookItem = document.createElement("div");
 
     const bookControls = document.createElement('div'),
     deleteButton = document.createElement('button'),
     changeBookInfoButton = document.createElement('button'),
     trash = document.createElement('img'),
     editBook = document.createElement('img');
+    
     bookControls.classList.add('bookControls');
     trash.src = 'img/delete.svg';
     editBook.src = 'img/book-edit.svg';
     deleteButton.classList.add('bookControlButton');
+    deleteButton.classList.add('trashBook');
     changeBookInfoButton.classList.add('bookControlButton');
-    trash.style.height = '100%';
-    // deleteButton.textContent = 'text';
+    changeBookInfoButton.classList.add('modifyBook');
+    deleteButton.dataset.targetID = book.id;
 
     changeBookInfoButton.appendChild(editBook);
     deleteButton.appendChild(trash);
@@ -90,7 +91,7 @@ function loadBookIntoShelf(book) {
         };
     };
 
-    container.appendChild(bookItem);
+    bookshelfContainer.appendChild(bookItem);
     updateBookStats(myBooks)
 };
 
@@ -124,30 +125,42 @@ function getRandomRotation(min, max) {
     return `${rotation.toFixed(1)}deg`;
 }
 
-// Popup code
+function removeBookFromLibrary(library, id) {
+    // Find book w/ ID in library and get its index
+    const bookToRemove = library.findIndex(book => book.id === id);
+    // Remove the book in library
+    const tempShelf = library.splice(bookToRemove, 1);
+    // Remove the book from the visible library
+    const bookCard = document.querySelector(`[data-id="${id}"]`)
+    bookCard.remove()
 
-document.addEventListener('DOMContentLoaded', function() {
+    console.log(`Successfully removed book with id ${id}`)
+}
+
+// Interaction codes
+
+document.addEventListener('DOMContentLoaded', () => {
   const openPopupBtn = document.querySelector('#addBook'),
   closePopupBtn = document.querySelector('#closePopupBtn'),
   myPopup = document.querySelector('#addBookMenu');
 
-  openPopupBtn.addEventListener('click', function() {
+  openPopupBtn.addEventListener('click', () => {
     myPopup.style.display = 'block';
   });
 
-  closePopupBtn.addEventListener('click', function() {
+  closePopupBtn.addEventListener('click', () => {
     myPopup.style.display = 'none';
   });
 
   // Optional: Close pop-up when clicking outside the content
-  window.addEventListener('click', function(event) {
+  window.addEventListener('click', (event) => {
     if (event.target === myPopup) {
       myPopup.style.display = 'none';
     }
   });
 });
 
-bookInputForm.addEventListener('submit', function(event) {
+bookInputForm.addEventListener('submit', (event) => {
     const inputForm = document.querySelector('#addBookMenu');
 
     event.preventDefault();
@@ -169,6 +182,18 @@ bookInputForm.addEventListener('submit', function(event) {
     inputForm.style.display = 'none';
 });
 
+bookshelfContainer.addEventListener('click', (event) => {
+    const trashButton = event.target.closest('.trashBook');
+    console.log(trashButton)
+    
+    if (trashButton) {
+        const bookID = trashButton.dataset.targetID;
+        console.log(bookID)
+
+        removeBookFromLibrary(myBooks, bookID);
+    }
+})
+
 // Test runs
 
 updateBookStats(myBooks);
@@ -189,8 +214,6 @@ addBookToLibrary("The Giving Tree", "Shel Silverstein",
     64, false
 )
 
-
 myBooks.forEach((book) => {
     loadBookIntoShelf(book);
 });
-
