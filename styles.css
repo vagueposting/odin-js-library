@@ -88,6 +88,10 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Custom styles incoming! */
 
+button {
+  user-select: none;
+}
+
 .sidebar {
   display: flex;
   flex-direction: column;
@@ -199,7 +203,7 @@ h1, h2, h3, h4, h5, h6 {
 .bookStats {
   position: relative;
   top: 3rem;
-  left: calc(10% + 25px);
+  left: calc(2% + 25px);
   background-image:
     linear-gradient(
       to bottom,
@@ -333,7 +337,6 @@ table::before {
   display: flex;
   flex-direction: row;
   justify-content: center;
-  user-select: none;
   gap: 2rem;
 }
 
