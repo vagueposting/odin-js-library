@@ -256,7 +256,7 @@ function setupPopupCloseListeners(divPopup, closeButton) {
 }
 
 function generateRandomPlaceholders() {
-    const placeholders = [
+    const placeholderOptions = [
         {
             title: 'angry man fights whale',
             author: 'guy from whaling ship'
@@ -276,13 +276,15 @@ function generateRandomPlaceholders() {
         {
             title: 'dad must paint hell',
             author: 'depressed japanese man'
+        },
+        {
+            title: 'smartass makes deal with devil',
+            author: 'famous german author'
         }
-    ],
-    placeholderCount = placeholders.length,
-    min = 0;
+    ];
 
-    let pick = Math.floor(Math.random() * (
-        placeholderCount - min + 1)) + min;
+    let pick = Math.floor(
+        Math.random() * placeholders.length);
 
     return placeholders[pick]
 }
@@ -310,7 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         formBookTitle.setAttribute('placeholder', placeholders.title)
         formBookAuthor.setAttribute('placeholder', placeholders.author)
-        
+
         showPopup(addBookForm);
     });
 });
