@@ -477,6 +477,24 @@ table::before {
   font-style: italic;
 }
 
+.keyReadTrue {
+  top: -0.7rem;
+}
+
+.valueReadTrue {
+  top: -0.4rem;
+  font-size: 1.6rem;
+}
+
+.keyReadFalse {
+  top: -0.5rem;
+}
+
+.valueReadFalse {
+  top: -0.3rem;
+  font-size: 1.4rem;
+}
+
 .bookControls {
   display: flex;
   flex-direction: row;
