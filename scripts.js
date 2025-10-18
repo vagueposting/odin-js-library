@@ -21,17 +21,35 @@ const bookshelfContainer = document.querySelector('.bookshelf'),
 
 let bookIDToDelete = null;
 
-function Book(title, author, pages, readStatus) {
+class Book {
+    constructor(title, author, pages, readStatus) {
     this.title = title;
     this.author = author;
     this.pages = pages;
     this.id = crypto.randomUUID();
     this.readStatus = readStatus;
+}};
+
+/**
+ * Lets you add a book to the library.
+ * @param {Array} library - the library array 
+ * @param {String} title -
+ * @param {String} author 
+ * @param {Number} pages 
+ * @param {Boolean} readStatus 
+ */
+
+function addBookToLibrary(library, title, author, pages, readStatus) {
+    library.push(new Book(title, author, pages, readStatus))
 };
 
-function addBookToLibrary(title, author, pages, readStatus) {
-    myBooks.push(new Book(title, author, pages, readStatus))
-};
+/** 
+ * Inserts an identified book into the user-side library.
+ * 
+ * @param {Object} book - the book object found in 
+ * the myBooks array
+ */
+
 
 function loadBookIntoShelf(book) {
     // Init book item div
@@ -73,6 +91,16 @@ function loadBookIntoShelf(book) {
     updateBookStats(myBooks)
 };
 
+/** 
+ * Gets the information of a "book" and modifies its 
+ * associated div.
+ * 
+ * @param {HTMLElement} bookItem - the div containing the book's
+ * information.
+ * @param {Object} book - the book object found in 
+ * the myBooks array
+ */
+
 function modifyBookItemInfo(bookItem, book) {
     while (bookItem.lastChild && bookItem.lastChild !== bookControls) {
         bookItem.removeChild(bookItem.lastChild);
@@ -94,9 +122,7 @@ function modifyBookItemInfo(bookItem, book) {
                 .replace(/^./, str => str.toUpperCase())}
                 else {
                     displayKey = "Read?"
-                };
-                console.log(displayKey)
-            
+                };            
 
             if (key === 'title') {
                 infoValue.classList.add("bookTitle")
@@ -130,6 +156,14 @@ function modifyBookItemInfo(bookItem, book) {
     };
 
     return bookItem;
+}
+
+function modifyBook(library, bookID) {
+    console.log('This function exists!')
+
+    targetBook = 
+
+    modifyBookItemInfo()
 }
 
 function updateBookStats(library) {
@@ -210,7 +244,7 @@ bookInputForm.addEventListener('submit', (event) => {
     pages = Number(formBookPages.value),
     readStatus = formBookStatus.value;
 
-    addBookToLibrary(title, author, pages, readStatus);
+    addBookToLibrary(myBooks, title, author, pages, readStatus);
     loadBookIntoShelf(myBooks[myBooks.length - 1])
 
     inputForm.style.display = 'none';
@@ -235,23 +269,24 @@ confirmWindow.addEventListener('submit', (e) => {
 
     confirmWindow.style.display = 'none'; 
 });
-// Test runs
+
+// ==== TEST RUNS ===
 
 updateBookStats(myBooks);
 
-addBookToLibrary("Moby Dick",
+addBookToLibrary(myBooks, "Moby Dick",
     "Herman Melville", 544, false
 );
 
-addBookToLibrary("Wuthering Heights",
+addBookToLibrary(myBooks, "Wuthering Heights",
     "Emily Brontë", 416, true
 )
 
-addBookToLibrary("The Odyssey", "Homer",
+addBookToLibrary(myBooks, "The Odyssey", "Homer",
     140, true
 )
 
-addBookToLibrary("The Giving Tree", "Shel Silverstein",
+addBookToLibrary(myBooks, "The Giving Tree", "Shel Silverstein",
     64, false
 )
 
