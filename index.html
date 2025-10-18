@@ -9,7 +9,7 @@
 	href="https://cdn.jsdelivr.net/npm/@radix-ui/colors@latest/gray.css"
     />
     <script src="scripts.js" defer></script>
-    <title>Document</title>
+    <title>My Library!</title>
 </head>
 <body>
     <div class="sidebar">
@@ -60,7 +60,7 @@
                 <li><label for="bookAuthor">Author:</label>
                     <input
                     type="text"
-                    id="bookAuthor"
+                    id="bookAuthor"a
                     name="bookAuthor"
                     required
                     minlength="1"
@@ -82,8 +82,21 @@
                 </li>
             </ul>
             <div class="popupControls">
-                <button id="closePopupBtn" class="popupButton">Close</button>
+                <button id="closeAddBookForm" class="popupButton">Close</button>
                 <button type="submit" id="submitBook" class="popupButton">Submit</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="confirmBookDeletion" class="popupOverlay">
+        <form class="popupContent" style="width: 20%;">
+            Are you sure you want to remove this book?
+            <div class="popupControls">
+                <button type="button" id="cancelDelete" 
+                class="popupButton">No</button>
+                <button type="submit"
+                id="confirmDelete" 
+                class="popupButton">Yes</button>
             </div>
         </form>
     </div>
