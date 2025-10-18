@@ -230,7 +230,7 @@ function grabBookDetails(library, id) {
     formBookTitle.value = myBooks[bookToModify].title;
     formBookAuthor.value = myBooks[bookToModify].author;
     formBookPages.value = Number(myBooks[bookToModify].pages);
-    formBookStatus.value = Boolean(myBooks[bookToModify].readStatus);
+    formBookStatus.checked = Boolean(myBooks[bookToModify].readStatus);
 }
 
 /**
@@ -255,6 +255,38 @@ function setupPopupCloseListeners(divPopup, closeButton) {
     });
 }
 
+function generateRandomPlaceholders() {
+    const placeholders = [
+        {
+            title: 'angry man fights whale',
+            author: 'guy from whaling ship'
+        },
+        {
+            title: 'greek man lost at sea',
+            author: 'ancient greek anon'
+        },
+        {
+            title: 'sad couple miscommunicates',
+            author: 'english girl from writer fam'
+        },
+        {
+            title: 'german boy has awakening',
+            author: 'philosopher dude'
+        },
+        {
+            title: 'dad must paint hell',
+            author: 'depressed japanese man'
+        }
+    ],
+    placeholderCount = placeholders.length,
+    min = 0;
+
+    let pick = Math.floor(Math.random() * (
+        placeholderCount - min + 1)) + min;
+
+    return placeholders[pick]
+}
+
 /**
  * Displays the target popup element.
  * @param {HTMLElement} divPopup - The main popup 
@@ -273,6 +305,12 @@ document.addEventListener('DOMContentLoaded', () => {
     setupPopupCloseListeners(confirmWindow, cancelDelete);
 
     addBookButton.addEventListener('click', () => {
+        const placeholders = generateRandomPlaceholders();
+        console.log(placeholders)
+
+        formBookTitle.setAttribute('placeholder', placeholders.title)
+        formBookAuthor.setAttribute('placeholder', placeholders.author)
+        
         showPopup(addBookForm);
     });
 });
