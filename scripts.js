@@ -15,11 +15,15 @@ const bookshelfContainer = document.querySelector('.bookshelf'),
     formBookAuthor = document.querySelector('#bookAuthor'),
     formBookPages = document.querySelector('#bookPages'),
     formBookStatus = document.querySelector('#bookStatus'),
-    submitBookButton = document.querySelector('#submitBook')
+    submitBookButton = document.querySelector('#submitBook'),
     // Confirm to delete books
     confirmWindow = document.querySelector('#confirmBookDeletion');
 
-let bookIDToDelete = null;
+let appState = {
+    idToDelete: null,
+    idToEdit: null,
+    editingBook: false
+};
 
 class Book {
     constructor(title, author, pages, readStatus) {
@@ -27,20 +31,31 @@ class Book {
     this.author = author;
     this.pages = pages;
     this.id = crypto.randomUUID();
-    this.readStatus = readStatus;
+    this.readStatus = Boolean(readStatus);
 }};
 
 /**
  * Lets you add a book to the library.
- * @param {Array} library - the library array 
- * @param {String} title -
- * @param {String} author 
- * @param {Number} pages 
- * @param {Boolean} readStatus 
+ * @param {Array} library - the library array ie., myBooks
+ * @param {String} title - book title
+ * @param {String} author - book author
+ * @param {Number} pages - # of pages
+ * @param {Boolean} readStatus - has the book been completed?
  */
 
-function addBookToLibrary(library, title, author, pages, readStatus) {
+function addBookToLibrary(library, title, author, 
+    pages, readStatus) {
     library.push(new Book(title, author, pages, readStatus))
+};
+
+function updateBookInLibrary(library, id, newTitle, newAuthor,
+    newPages, newReadStatus) {
+    const t = library.findIndex(book => book.id === id)
+
+    library[t].title = newTitle;
+    library[t].author = newAuthor;
+    library[t].pages = newPages;
+    library[t].readStatus = newReadStatus;
 };
 
 /** 
@@ -69,6 +84,7 @@ function loadBookIntoShelf(book) {
     changeBookInfoButton.classList.add('bookControlButton');
     changeBookInfoButton.classList.add('modifyBook');
     deleteButton.dataset.targetID = book.id;
+    changeBookInfoButton.dataset.targetID = book.id;
 
     changeBookInfoButton.appendChild(editBook);
     deleteButton.appendChild(trash);
@@ -102,9 +118,9 @@ function loadBookIntoShelf(book) {
  */
 
 function modifyBookItemInfo(bookItem, book) {
-    while (bookItem.lastChild && bookItem.lastChild !== bookControls) {
-        bookItem.removeChild(bookItem.lastChild);
-    }
+    const bookControls = bookItem.querySelector('.bookControls');
+
+    bookItem.innerHTML = ''; 
 
     for (const [key, value] of Object.entries(book)) {
         if (key != 'id' && value !== null && value !== undefined) {
@@ -134,15 +150,13 @@ function modifyBookItemInfo(bookItem, book) {
 
                 infoKey.textContent = `${displayKey} `;
                 if (book.readStatus) {
+                    infoKey.classList.add('keyReadTrue');
+                    infoValue.classList.add('valueReadTrue')
                     infoValue.textContent = '✔';
-                    infoValue.style.fontSize = '1.6rem';
-                    infoKey.style.top = '-0.7rem';
-                    infoValue.style.top = '-0.4rem';
                 } else {
+                    infoKey.classList.add('keyReadFalse');
+                    infoValue.classList.add('valueReadFalse')
                     infoValue.textContent = '✘';
-                    infoValue.style.fontSize = '1.4rem';
-                    infoKey.style.top = '-0.5rem';
-                    infoValue.style.top = '-0.3rem';
                 }
             } else {
                 infoKey.textContent = `${displayKey}: `;
@@ -154,16 +168,12 @@ function modifyBookItemInfo(bookItem, book) {
             bookItem.appendChild(lineBreak);
         };
     };
+    
+    if (bookControls) {
+        bookItem.appendChild(bookControls);
+    }
 
     return bookItem;
-}
-
-function modifyBook(library, bookID) {
-    console.log('This function exists!')
-
-    targetBook = 
-
-    modifyBookItemInfo()
 }
 
 function updateBookStats(library) {
@@ -197,8 +207,10 @@ function getRandomRotation(min, max) {
 }
 
 function removeBookFromLibrary(library, id) {
-    // Find book w/ ID in library and get its index
-    const bookToRemove = library.findIndex(book => book.id === id);
+    //   book w/ ID in library and get its index
+    const bookToRemove = library.findIndex(book => 
+        book.id === id
+    );
     // Remove the book from the visible library
     const bookCard = document.querySelector(`[data-id="${id}"]`)
     if (bookCard) {
@@ -208,88 +220,135 @@ function removeBookFromLibrary(library, id) {
     updateBookStats(library);
 }
 
-function popupController(open, close, divPopup) {
-    // querySelect DOM items first!
-    open.addEventListener('click', () => {
-        divPopup.style.display = 'block';
-    })
+function grabBookDetails(library, id) {
+    // capture book index
+    const bookToModify = library.findIndex(book => 
+        book.id === id
+    )
 
-    close.addEventListener('click', () => {
+    // change form details
+    formBookTitle.value = myBooks[bookToModify].title;
+    formBookAuthor.value = myBooks[bookToModify].author;
+    formBookPages.value = Number(myBooks[bookToModify].pages);
+    formBookStatus.value = Boolean(myBooks[bookToModify].readStatus);
+}
+
+/**
+ * Sets up listeners to close the popup via its close 
+ * button or an outside click.
+ * @param {HTMLElement} divPopup - The main popup 
+ * container element.
+ * @param {HTMLElement} closeButton - The button that 
+ * triggers the close action.
+ */
+function setupPopupCloseListeners(divPopup, closeButton) {
+    // Close button listener
+    closeButton.addEventListener('click', () => {
         divPopup.style.display = 'none';
-    })
+    });
 
+    // 2. Outside-click listener
     window.addEventListener('click', (event) => {
         if (event.target === divPopup) {
             divPopup.style.display = 'none';
         }
-    })
-};
+    });
+}
+
+/**
+ * Displays the target popup element.
+ * @param {HTMLElement} divPopup - The main popup 
+ * container element.
+ */
+function showPopup(divPopup) {
+    divPopup.style.display = 'block';
+}
 
 // Interaction codes
 
-// Add Book Button
-document.addEventListener('DOMContentLoaded', 
-    popupController(addBookButton, 
-        closeAddBookForm, 
-        addBookForm));
+document.addEventListener('DOMContentLoaded', () => {
+    setupPopupCloseListeners(addBookForm, closeAddBookForm);
 
+    const cancelDelete = document.querySelector('#cancelDelete');
+    setupPopupCloseListeners(confirmWindow, cancelDelete);
+
+    addBookButton.addEventListener('click', () => {
+        showPopup(addBookForm);
+    });
+});
+
+// The actual book input form
+// The actual book input form
 bookInputForm.addEventListener('submit', (event) => {
     const inputForm = document.querySelector('#addBookMenu');
 
     event.preventDefault();
-    submitBookButton.disabled = true; // Prevents doubled inputs!
+    submitBookButton.disabled = true;
     
     const title = formBookTitle.value,
     author = formBookAuthor.value,
     pages = Number(formBookPages.value),
-    readStatus = formBookStatus.value;
+    readStatus = formBookStatus.checked;
 
-    addBookToLibrary(myBooks, title, author, pages, readStatus);
-    loadBookIntoShelf(myBooks[myBooks.length - 1])
+    if (appState.editingBook) {
+        
+        updateBookInLibrary(myBooks, appState.idToEdit,
+            title, author, pages, readStatus
+        );
 
+        const bookIndex = myBooks.findIndex(book => book.id === appState.idToEdit);
+        const updatedBook = myBooks[bookIndex];
+
+        const existingBookItem = document.querySelector(`[data-id="${appState.idToEdit}"]`);
+
+        if (existingBookItem && updatedBook) {
+            modifyBookItemInfo(existingBookItem, updatedBook);
+        }
+        
+        appState.editingBook = false;
+        appState.idToEdit = null;
+
+        updateBookStats(myBooks);
+
+    } else {
+        addBookToLibrary(myBooks, title, author,
+            pages, readStatus);
+            
+        loadBookIntoShelf(myBooks[myBooks.length - 1])
+    }
+    
+    submitBookButton.disabled = false;
     inputForm.style.display = 'none';
+
+    bookInputForm.reset();
 });
 
 bookshelfContainer.addEventListener('click', (event) => {
-    const trashButton = event.target.closest('.trashBook'),
-    cancelDelete = document.querySelector('#cancelDelete');
-    
+    const trashButton = event.target.closest('.trashBook');
+    const editButton = event.target.closest('.modifyBook');
+        
     if (trashButton) {
-        bookIDToDelete = trashButton.dataset.targetID;
-        popupController(trashButton, cancelDelete, confirmWindow);
-    }});
+        appState.idToDelete = trashButton.dataset.targetID;
+        showPopup(confirmWindow); 
+    }
+
+    if (editButton) {
+        appState.idToEdit = editButton.dataset.targetID;
+        appState.editingBook = true;
+        
+        grabBookDetails(myBooks, appState.idToEdit);
+        
+        showPopup(addBookForm);
+    }
+});
 
 confirmWindow.addEventListener('submit', (e) => { 
     e.preventDefault(); 
     
-    if (bookIDToDelete) {
-        removeBookFromLibrary(myBooks, bookIDToDelete);
-        bookIDToDelete = null;
+    if (appState.idToDelete) {
+        removeBookFromLibrary(myBooks, appState.idToDelete);
+        appState.idToDelete = null;
     }
 
     confirmWindow.style.display = 'none'; 
-});
-
-// ==== TEST RUNS ===
-
-updateBookStats(myBooks);
-
-addBookToLibrary(myBooks, "Moby Dick",
-    "Herman Melville", 544, false
-);
-
-addBookToLibrary(myBooks, "Wuthering Heights",
-    "Emily Brontë", 416, true
-)
-
-addBookToLibrary(myBooks, "The Odyssey", "Homer",
-    140, true
-)
-
-addBookToLibrary(myBooks, "The Giving Tree", "Shel Silverstein",
-    64, false
-)
-
-myBooks.forEach((book) => {
-    loadBookIntoShelf(book);
 });
