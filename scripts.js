@@ -107,93 +107,45 @@ function DataController() {
 
 
 function DisplayController() {
-    const bookshelfContainer = document.querySelector('.bookshelf'),
-    // Book stats
-    bookCount = document.querySelector('#bookCount'),
-    pageCount = document.querySelector('#pageCount'),
-    averagePages = document.querySelector('#averagePages'),
-    uniqueAuthors = document.querySelector('#uniqueAuthors'),
-    bookInputForm = document.querySelector('#bookInputForm'),
-    // Book form
-    addBookButton = document.querySelector('#addBook'),
-    addBookForm = document.querySelector('#addBookMenu'),
-    closeAddBookForm = document.querySelector('#closeAddBookForm'),
-    // Book Information
-    formBookTitle = document.querySelector('#bookTitle'),
-    formBookAuthor = document.querySelector('#bookAuthor'),
-    formBookPages = document.querySelector('#bookPages'),
-    formBookStatus = document.querySelector('#bookStatus'),
-    submitBookButton = document.querySelector('#submitBook'),
-    // Confirm to delete books
-    confirmWindow = document.querySelector('#confirmBookDeletion');
-
-
-    /** 
- * Inserts an identified book into the user-side library.
- * 
- * @param {Object} book - the book object found in 
- * the myBooks array
- */
-
-    function loadBookIntoShelf(book) {
-        // Init book item div
-        const bookItem = document.createElement("div");
-
-        // Generate buttons
-        const bookControls = document.createElement('div'),
-        deleteButton = document.createElement('button'),
-        changeBookInfoButton = document.createElement('button'),
-        trash = document.createElement('img'),
-        editBook = document.createElement('img');
-        bookControls.classList.add('bookControls');
-        trash.src = 'img/delete.svg';
-        editBook.src = 'img/book-edit.svg';
-        deleteButton.classList.add('bookControlButton');
-        deleteButton.classList.add('trashBook');
-        changeBookInfoButton.classList.add('bookControlButton');
-        changeBookInfoButton.classList.add('modifyBook');
-        deleteButton.dataset.targetID = book.id;
-        changeBookInfoButton.dataset.targetID = book.id;
-
-        changeBookInfoButton.appendChild(editBook);
-        deleteButton.appendChild(trash);
-        bookControls.appendChild(changeBookInfoButton);
-        bookControls.appendChild(deleteButton)    
-        
-        const rotationValue = getRandomRotation(-2.5, 2.5)
-        bookItem.classList.add("bookItem");
-
-        bookItem.style.setProperty('--rand-rot', rotationValue)
-        bookItem.style.setProperty('backface-visibility', 'hidden')
-        bookItem.style.setProperty('-webkit-backface-visibility', 'hidden')
-
-        bookItem.dataset.id = book.id;
-
-        modifyBookItemInfo(bookItem, book);
-        bookItem.appendChild(bookControls)
-
-        bookshelfContainer.appendChild(bookItem);
-        updateBookStats(myBooks)
+    const displayObjects = {
+        bookshelfContainer: document.querySelector('.bookshelf'),
+        bookStats: {
+            bookCount: document.querySelector('#bookCount'),
+            pageCount: document.querySelector('#pageCount'),
+            averagePages: document.querySelector('#averagePages'),
+            uniqueAuthors: document.querySelector('#uniqueAuthors')
+        },
+        bookForm: {
+            // Controls
+            bookInputForm: document.querySelector('#bookInputForm'),
+            addBook: document.querySelector('#addBook'),
+            closeBookForm: document.querySelector('#closeAddBookForm'),
+            submitBook: document.querySelector('#submitBook'),
+            // Actual info fields
+            bookInfo: {
+                formBookTitle: document.querySelector('#bookTitle'),
+                formBookAuthor: document.querySelector('#bookAuthor'),
+                formBookPages: document.querySelector('#bookPages'),
+                formBookStatus: document.querySelector('#bookStatus'),
+            },
+        },
+        confirmDeleteModal: document.querySelector('#confirmBookDeletion')
     };
 
     /** 
      * Gets the information of a "book" and modifies its 
      * associated div.
      * 
-     * @param {HTMLElement} bookItem - the div containing the book's
-     * information.
      * @param {Object} book - the book object found in 
      * the myBooks array
      */
 
-    function modifyBookItemInfo(bookItem, book) {
-        const bookControls = bookItem.querySelector('.bookControls');
+    function createBookInfoElements(book) {
+        const fragment = document.createDocumentFragment();
 
-        bookItem.innerHTML = ''; 
-
-        for (const [key, value] of Object.entries(book)) {
+        function addInfoLine(key, value) {
             if (key != 'id' && value !== null && value !== undefined) {
-                const infoKey = document.createElementf("span");
+                const infoKey = document.createElement("span");
                 const infoValue = document.createElement("span");
                 const lineBreak = document.createElement("br");
 
@@ -232,19 +184,90 @@ function DisplayController() {
                     infoValue.textContent = `${value}`;
                 }
 
-                bookItem.appendChild(infoKey);
-                bookItem.appendChild(infoValue);
-                bookItem.appendChild(lineBreak);
+                fragment.appendChild(infoKey);
+                fragment.appendChild(infoValue);
+                fragment.appendChild(lineBreak);
             };
-        };
-        
-        if (bookControls) {
-            bookItem.appendChild(bookControls);
         }
 
-        return bookItem;
+        for (const [key, value] of Object.entries(book)) {
+            addInfoLine(key, value)
+        };
+        
+
+        return fragment;
     }
 
+/** 
+ * Inserts an identified book into the user-side library.
+ * 
+ * @param {Object} book - the book object found in 
+ * the myBooks array, which uses class Book
+ */
+
+    function loadBookIntoShelf(book) {
+        // Init book item div
+        const bookItem = document.createElement("div");
+
+        function generateControls() {
+            const bookControls = document.createElement('div'),
+            deleteButton = document.createElement('button'),
+            changeBookInfoButton = document.createElement('button'),
+            trash = document.createElement('img'),
+            editBook = document.createElement('img');
+
+            bookControls.classList.add('bookControls');
+            
+            // Delete button
+            trash.src = 'img/delete.svg';
+            deleteButton.classList.add('trashBook');
+            deleteButton.classList.add('bookControlButton');
+            deleteButton.dataset.targetID = book.id;
+
+            // Edit button
+            editBook.src = 'img/book-edit.svg';
+            changeBookInfoButton.classList.add('modifyBook');
+            changeBookInfoButton.classList.add('bookControlButton');
+            changeBookInfoButton.dataset.targetID = book.id;
+
+            changeBookInfoButton.appendChild(editBook);
+            deleteButton.appendChild(trash);
+
+            // Append the final buttons
+            bookControls.appendChild(changeBookInfoButton);
+            bookControls.appendChild(deleteButton)  
+
+            return bookControls
+        }
+
+        function getRandomRotation(min, max) {
+        const rotation = Math.random() * (max - min) + min;
+        
+        return `${rotation.toFixed(1)}deg`;
+        }
+
+        // Generate info
+        const bookInfoFragment = createBookInfoElements(book)
+
+        // Generate buttons
+        const bookControls = generateControls()   
+
+        // Get random rotation for index card        
+        const rotationValue = getRandomRotation(-2.5, 2.5)
+        
+        bookItem.classList.add("bookItem");
+        bookItem.style.setProperty('--rand-rot', rotationValue)
+
+        // For editing reference, might remove later when I
+        // work out event-based editing.
+        bookItem.dataset.id = book.id;
+
+        bookItem.appendChild(bookInfoFragment)
+        bookItem.appendChild(bookControls)
+        displayObjects.bookshelfContainer.appendChild(bookItem);
+    };
+
+    // TODO: change this to an eventListener function for book-stats-updated
     /* function updateBookStats(library) {
          Compute page count 
         if (library.length > 0) {
@@ -268,12 +291,6 @@ function DisplayController() {
         uniqueAuthors.textContent = `0`
         }
     } */
-
-    function getRandomRotation(min, max) {
-        const rotation = Math.random() * (max - min) + min;
-        
-        return `${rotation.toFixed(1)}deg`;
-    }
 
     function removeBookFromLibrary(library, id) {
         //   book w/ ID in library and get its index
@@ -324,7 +341,7 @@ function DisplayController() {
         });
     }
 
-    function generateRandomPlaceholders() {
+    function generateRandomPlaceholder() {
         const placeholderOptions = [
             {
                 title: 'angry man fights whale',
@@ -376,7 +393,7 @@ function DisplayController() {
         setupPopupCloseListeners(confirmWindow, cancelDelete);
 
         addBookButton.addEventListener('click', () => {
-            const placeholders = generateRandomPlaceholders();
+            const placeholders = generateRandomPlaceholder();
             console.log(placeholders)
 
             formBookTitle.setAttribute('placeholder', placeholders.title)
@@ -386,7 +403,7 @@ function DisplayController() {
         });
     });
 
-    // The actual book input form
+    // The actual book input fom
     // The actual book input form
     bookInputForm.addEventListener('submit', (event) => {
         const inputForm = document.querySelector('#addBookMenu');

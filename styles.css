@@ -444,6 +444,9 @@ table::before {
   max-height: 15rem;
   overflow-y: auto; 
   line-height: 1.60;
+
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .bookItem::before {
