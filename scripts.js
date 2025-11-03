@@ -292,6 +292,7 @@ function DisplayController() {
         }
     } */
 
+    // TODO: change to event dispatcher
     function removeBookFromLibrary(library, id) {
         //   book w/ ID in library and get its index
         const bookToRemove = library.findIndex(book => 
@@ -306,6 +307,8 @@ function DisplayController() {
         updateBookStats(library);
     }
 
+    // TODO: I have no idea what this does but I'll also probably turn this 
+    // into another event dispatcher
     function grabBookDetails(library, id) {
         // capture book index
         const bookToModify = library.findIndex(book => 
@@ -372,7 +375,7 @@ function DisplayController() {
         let pick = Math.floor(
             Math.random() * placeholders.length);
 
-        return placeholders[pick]
+        return placeholderOptions[pick]
     }
 
     /**
