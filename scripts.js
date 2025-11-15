@@ -13,18 +13,25 @@ function DataController() {
     this.author = author;
     this.pages = pages;
     this.id = crypto.randomUUID();
-    this.readStatus = Boolean(readStatus);
     this.genre = genre;
+    this.readStatus = Boolean(readStatus);
     }
 
-    updateInfo(newTitle, newAuthor, newPages, newReadStatus, newGenre) {
+    updateInfo(newTitle, newAuthor, newPages, newGenre, newReadStatus) {
         this.title = newTitle;
         this.author = newAuthor;
         this.pages = newPages;
-        this.readStatus = newReadStatus;
         this.genre = newGenre;
+        this.readStatus = newReadStatus;
+
 
         updateBookStats();
+
+        const bookInfoUpdated = new CustomEvent('book-info-updated', {
+            detail: this
+        });
+
+        document.dispatchEvent(bookInfoUpdated)
     }};
 
     /**
@@ -42,7 +49,10 @@ function DataController() {
         myBooks.push(newBook)
         updateBookStats();
 
-        return `Library size: ${library.length}`;
+        const bookAdded = new CustomEvent('book-added', {
+            detail: newBook
+        });
+        document.dispatchEvent(bookAdded);
         }
     
     /**
@@ -51,11 +61,16 @@ function DataController() {
      * @returns if the book exists in the library
      */
     function removeBookFromLibrary(bookID) {
-        const index = myBooks.findIndex(book => book.id = bookID);
+        const index = myBooks.findIndex(book => book.id === bookID);
 
         if (index !== -1) {
             myBooks.splice(index, 1);
             updateBookStats();
+            const bookRemoved = new CustomEvent('book-removed', {
+                detail: { bookID: bookID }
+            });
+            document.dispatchEvent(bookRemoved)
+            
             return true;
         }
 
@@ -78,7 +93,7 @@ function DataController() {
                 libraryStats.averagePagesValue = totalPages / myBooks.length;
                 
                 libraryStats.uniqueAuthorCount = new Set(myBooks.map(item => item.author)).size;
-                libraryStats.readBookCount = myBooks.filter(item => item.readStatus).length;
+                libraryStats.totalReadBooks = myBooks.filter(item => item.readStatus).length;
             }
             
             const statsUpdated = new CustomEvent('book-stats-updated', {
@@ -88,32 +103,21 @@ function DataController() {
             document.dispatchEvent(statsUpdated);
         }
 
-    // Listens for the "bookAdded" and "bookRemoved" event triggered by the form modal
-    document.addEventListener('book-added', (e) => {
-        const { title, author, pages, readStatus, genre } = e.detail;
-        
-        addBookToLibrary(title, author, pages, readStatus, genre)});
-
-    document.addEventListener('book-removed', (e) => {
-        const { bookID } = e.detail;
-
-        removeBookFromLibrary(bookID)});
-
     return { getBooks,
         addBook: addBookToLibrary,
         removeBook: removeBookFromLibrary
      }
 }
 
-
-function DisplayController() {
+function DisplayController(data) {
     const displayObjects = {
         bookshelfContainer: document.querySelector('.bookshelf'),
         bookStats: {
             bookCount: document.querySelector('#bookCount'),
             pageCount: document.querySelector('#pageCount'),
             averagePages: document.querySelector('#averagePages'),
-            uniqueAuthors: document.querySelector('#uniqueAuthors')
+            uniqueAuthors: document.querySelector('#uniqueAuthors'),
+            readBookCount: document.querySelector('#readBookCount')
         },
         bookForm: {
             // Controls
@@ -126,6 +130,7 @@ function DisplayController() {
                 formBookTitle: document.querySelector('#bookTitle'),
                 formBookAuthor: document.querySelector('#bookAuthor'),
                 formBookPages: document.querySelector('#bookPages'),
+                formBookGenre: document.querySelector('#bookGenre'),
                 formBookStatus: document.querySelector('#bookStatus'),
             },
         },
@@ -198,12 +203,12 @@ function DisplayController() {
         return fragment;
     }
 
-/** 
- * Inserts an identified book into the user-side library.
- * 
- * @param {Object} book - the book object found in 
- * the myBooks array, which uses class Book
- */
+    /** 
+     * Inserts an identified book into the user-side library.
+     * 
+     * @param {Object} book - the book object found in 
+     * the myBooks array, which uses class Book
+     */
 
     function loadBookIntoShelf(book) {
         // Init book item div
@@ -267,59 +272,19 @@ function DisplayController() {
         displayObjects.bookshelfContainer.appendChild(bookItem);
     };
 
-    // TODO: change this to an eventListener function for book-stats-updated
-    /* function updateBookStats(library) {
-         Compute page count 
-        if (library.length > 0) {
-        const pagesPerBook = library.map(item => item.pages);
-        const totalPages = pagesPerBook.reduce((accumulator, currentValue) =>
-            accumulator + currentValue);
-        const averagePagesValue = totalPages / library.length;
-         Compute unique authors 
-        const uniqueAuthorSet = new Set(
-            library.map(item => item.author));
+    function grabBookDetails(id) {
+        const library = data.getBooks();
+        const bookToModify = library.findIndex(book => book.id === id);
+        const { title, author, pages, 
+            genre, readStatus } = library[bookToModify];
+        const { formBookTitle, formBookAuthor, formBookPages,
+            formBookGenre, formBookStatus } = displayObjects.bookForm.bookInfo;
 
-         Set stat values 
-        bookCount.textContent = `${library.length}`;
-        pageCount.textContent = `${totalPages}`
-        averagePages.textContent = `${Math.round(averagePagesValue)}`
-        uniqueAuthors.textContent = `${uniqueAuthorSet.size}`
-        } else {
-            bookCount.textContent = `0`;
-        pageCount.textContent = `0`
-        averagePages.textContent = `0`
-        uniqueAuthors.textContent = `0`
-        }
-    } */
-
-    // TODO: change to event dispatcher
-    function removeBookFromLibrary(library, id) {
-        //   book w/ ID in library and get its index
-        const bookToRemove = library.findIndex(book => 
-            book.id === id
-        );
-        // Remove the book from the visible library
-        const bookCard = document.querySelector(`[data-id="${id}"]`)
-        if (bookCard) {
-            bookCard.remove()
-        }
-        library.splice(bookToRemove, 1);
-        updateBookStats(library);
-    }
-
-    // TODO: I have no idea what this does but I'll also probably turn this 
-    // into another event dispatcher
-    function grabBookDetails(library, id) {
-        // capture book index
-        const bookToModify = library.findIndex(book => 
-            book.id === id
-        )
-
-        // change form details
-        formBookTitle.value = myBooks[bookToModify].title;
-        formBookAuthor.value = myBooks[bookToModify].author;
-        formBookPages.value = Number(myBooks[bookToModify].pages);
-        formBookStatus.checked = Boolean(myBooks[bookToModify].readStatus);
+        formBookTitle.value = title;
+        formBookAuthor.value = author;
+        formBookPages.value = Number(pages);
+        formBookGenre.value = genre;
+        formBookStatus.checked = Boolean(readStatus);
     }
 
     /**
@@ -387,7 +352,32 @@ function DisplayController() {
         divPopup.style.display = 'block';
     }
 
-    // Interaction codes
+    // Event listeners galore...
+    document.addEventListener('book-stats-updated', (e) => {
+        const { totalBooks, 
+            totalPages, 
+            averagePagesValue, 
+            uniqueAuthorCount, 
+            totalReadBooks } = e.detail;
+
+        const { bookCount, pageCount, averagePages,
+            uniqueAuthors, readBookCount } = displayObjects.bookStats
+
+        bookCount.textContent = totalBooks;
+        pageCount.textContent = totalPages;
+        averagePages.textContent = Math.round(averagePagesValue);
+        uniqueAuthors.textContent = uniqueAuthorCount;
+        readBookCount.textContent = totalReadBooks;
+    });
+
+    document.addEventListener('book-removed', (e) => {
+        const { bookID } = e.detail;
+        const bookCard = document.querySelector(`[data-id="${bookID}"]`);
+
+        if (bookCard) {
+            bookCard.remove();
+        }
+    })
 
     document.addEventListener('DOMContentLoaded', () => {
         setupPopupCloseListeners(addBookForm, closeAddBookForm);
@@ -406,8 +396,10 @@ function DisplayController() {
         });
     });
 
-    // The actual book input fom
     // The actual book input form
+    // TODO: turn this into a pure event dispatcher,
+    // then add a listener to DataController()
+    // This is a lot of work though so I'm saving it second-to-last
     bookInputForm.addEventListener('submit', (event) => {
         const inputForm = document.querySelector('#addBookMenu');
 
@@ -452,20 +444,23 @@ function DisplayController() {
         bookInputForm.reset();
     });
 
+    // TODO: dispatch event-book-requested and delete-book-requested  
     bookshelfContainer.addEventListener('click', (event) => {
         const trashButton = event.target.closest('.trashBook');
         const editButton = event.target.closest('.modifyBook');
             
         if (trashButton) {
-            appState.idToDelete = trashButton.dataset.targetID;
+            const bookToDelete = data.getBooks().find(
+                b => b.id === editButtonButton.dataset.targetID);
             showPopup(confirmWindow); 
         }
 
         if (editButton) {
-            appState.idToEdit = editButton.dataset.targetID;
-            appState.editingBook = true;
+            const bookToEdit = data.getBooks().find(
+                b => b.id === editButton.dataset.targetID
+            );
             
-            grabBookDetails(myBooks, appState.idToEdit);
+            grabBookDetails(bookToEdit);
             
             showPopup(addBookForm);
         }
@@ -474,11 +469,13 @@ function DisplayController() {
     confirmWindow.addEventListener('submit', (e) => { 
         e.preventDefault(); 
         
-        if (appState.idToDelete) {
-            removeBookFromLibrary(myBooks, appState.idToDelete);
-            appState.idToDelete = null;
+        if (bookToDelete) {
+            data.removeBook(bookToDelete)
         }
 
         confirmWindow.style.display = 'none'; 
     });
 }
+
+const data = DataController();
+DisplayController(data);
