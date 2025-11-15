@@ -40,6 +40,10 @@
                 <th>Unique Authors</th>
                 <td><span id="uniqueAuthors"></span> author/s</td>
             </tr>
+            <tr>
+                <th>Books Completed</th>
+                <td><span id="readBookCount"></span> book/s</td>
+            </tr>
         </table>
         </div>
     </div>
@@ -60,7 +64,7 @@
                 <li><label for="bookAuthor">Author:</label>
                     <input
                     type="text"
-                    id="bookAuthor"a
+                    id="bookAuthor"
                     name="bookAuthor"
                     required
                     minlength="1"
@@ -75,6 +79,15 @@
                         min="5"
                         required
                         size="2" />
+                </li>
+                <li><label for="bookGenre">Genre:</label>
+                    <input type="text" 
+                    id="bookGenre" 
+                    name="bookGenre" 
+                    required="required" 
+                    minlength="3" 
+                    maxlength="24"
+                    size="24">
                 </li>
                 <li><label for="bookStatus">Read?</label>
                     <input type="checkbox"
