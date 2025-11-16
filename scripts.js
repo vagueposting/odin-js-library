@@ -1,3 +1,8 @@
+// 2025-11-17 2:50 GMT +8
+// FIXME: Bug where clicking "close" and "submit" both
+// FIXME: Bug in editing screen where clicking "submit" renders 
+// a new book
+
 let appState = {
     idToDelete: null,
     idToEdit: null,
@@ -121,7 +126,7 @@ function DisplayController(data) {
         },
         bookForm: {
             // Controls
-            bookInputForm: document.querySelector('#bookInputForm'),
+            bookInputForm: document.querySelector('#addBookMenu'),
             addBook: document.querySelector('#addBook'),
             closeBookForm: document.querySelector('#closeAddBookForm'),
             submitBook: document.querySelector('#submitBook'),
@@ -137,6 +142,8 @@ function DisplayController(data) {
         confirmDeleteModal: document.querySelector('#confirmBookDeletion')
     };
 
+    console.log('Add Book Button Element:', displayObjects.bookForm.addBook);
+
     /** 
      * Gets the information of a "book" and modifies its 
      * associated div.
@@ -146,17 +153,21 @@ function DisplayController(data) {
      */
 
     function createBookInfoElements(book) {
-        const fragment = document.createDocumentFragment();
+        const infoContainer = document.createElement('div');
+        infoContainer.classList.add('bookInfoContent');
 
         function addInfoLine(key, value) {
             if (key != 'id' && value !== null && value !== undefined) {
+                const infoPiece = document.createElement("span")
                 const infoKey = document.createElement("span");
                 const infoValue = document.createElement("span");
                 const lineBreak = document.createElement("br");
 
-                let displayKey = ""
+                infoPiece.classList.add('infoPiece');
 
-                infoKey.classList.add("bookInfoHeader")
+                let displayKey = "";
+                
+                infoKey.classList.add("bookInfoHeader");
                 
                 if (key != 'readStatus') {
                     displayKey = key
@@ -177,11 +188,11 @@ function DisplayController(data) {
                     infoKey.textContent = `${displayKey} `;
                     if (book.readStatus) {
                         infoKey.classList.add('keyReadTrue');
-                        infoValue.classList.add('valueReadTrue')
+                        infoValue.classList.add('valueReadTrue');
                         infoValue.textContent = '✔';
                     } else {
                         infoKey.classList.add('keyReadFalse');
-                        infoValue.classList.add('valueReadFalse')
+                        infoValue.classList.add('valueReadFalse');
                         infoValue.textContent = '✘';
                     }
                 } else {
@@ -189,9 +200,11 @@ function DisplayController(data) {
                     infoValue.textContent = `${value}`;
                 }
 
-                fragment.appendChild(infoKey);
-                fragment.appendChild(infoValue);
-                fragment.appendChild(lineBreak);
+                infoPiece.appendChild(infoKey);
+                infoPiece.appendChild(infoValue);
+
+                infoContainer.appendChild(infoPiece);
+                infoContainer.appendChild(lineBreak);
             };
         }
 
@@ -200,14 +213,13 @@ function DisplayController(data) {
         };
         
 
-        return fragment;
+        return infoContainer;
     }
 
     /** 
      * Inserts an identified book into the user-side library.
      * 
-     * @param {Object} book - the book object found in 
-     * the myBooks array, which uses class Book
+     * @param {Object} book - object of class Book
      */
 
     function loadBookIntoShelf(book) {
@@ -274,9 +286,11 @@ function DisplayController(data) {
 
     function grabBookDetails(id) {
         const library = data.getBooks();
-        const bookToModify = library.findIndex(book => book.id === id);
-        const { title, author, pages, 
-            genre, readStatus } = library[bookToModify];
+        const bookToModify = library.find(book => book.id === id);
+
+        if (!bookToModify) return;
+
+        const { title, author, pages, genre, readStatus } = bookToModify;
         const { formBookTitle, formBookAuthor, formBookPages,
             formBookGenre, formBookStatus } = displayObjects.bookForm.bookInfo;
 
@@ -298,15 +312,34 @@ function DisplayController(data) {
     function setupPopupCloseListeners(divPopup, closeButton) {
         // Close button listener
         closeButton.addEventListener('click', () => {
-            divPopup.style.display = 'none';
+            divPopup.classList.remove('visible');
         });
 
         // 2. Outside-click listener
         window.addEventListener('click', (event) => {
             if (event.target === divPopup) {
-                divPopup.style.display = 'none';
+                divPopup.classList.remove('visible');
             }
         });
+    }
+
+    function showPopup(divPopup) {
+        divPopup.classList.add('visible');
+    }
+
+    function modifyBookItemInfo(updatedBook) {
+        const bookCard = document.querySelector(`[data-id="${updatedBook.id}"]`);
+        if (!bookCard) return;
+
+        const oldInfoContainer = bookCard.querySelector('.bookInfoContent');
+        const originalControls = bookCard.querySelector('.bookControls');
+        const newInfoContainer = createBookInfoElements(updatedBook);
+
+        if (oldInfoContainer) {
+            bookCard.replaceChild(newInfoContainer, oldInfoContainer);
+        } else {
+            bookCard.insertBefore(newInfoContainer, originalControls);
+        }
     }
 
     function generateRandomPlaceholder() {
@@ -338,21 +371,20 @@ function DisplayController(data) {
         ];
 
         let pick = Math.floor(
-            Math.random() * placeholders.length);
+            Math.random() * placeholderOptions.length);
 
         return placeholderOptions[pick]
     }
 
-    /**
-     * Displays the target popup element.
-     * @param {HTMLElement} divPopup - The main popup 
-     * container element.
-     */
-    function showPopup(divPopup) {
-        divPopup.style.display = 'block';
-    }
-
     // Event listeners galore...
+    document.addEventListener('book-added', (e) => {
+        loadBookIntoShelf(e.detail);
+    });
+
+    document.addEventListener('book-info-updated', (e) => {
+        modifyBookItemInfo(e.detail);
+    });
+    
     document.addEventListener('book-stats-updated', (e) => {
         const { totalBooks, 
             totalPages, 
@@ -378,17 +410,25 @@ function DisplayController(data) {
             bookCard.remove();
         }
     })
-
     document.addEventListener('DOMContentLoaded', () => {
-        setupPopupCloseListeners(addBookForm, closeAddBookForm);
+            console.log("DOMContentLoaded block executed.");
 
-        const cancelDelete = document.querySelector('#cancelDelete');
-        setupPopupCloseListeners(confirmWindow, cancelDelete);
+            const addBookForm = displayObjects.bookForm.bookInputForm; 
+            const closeBookForm = displayObjects.bookForm.closeBookForm;
+            const confirmWindow = displayObjects.confirmDeleteModal;
+            const addBookButton = displayObjects.bookForm.addBook;
+            
+            const cancelDelete = document.getElementById('cancelDelete');
+
+            setupPopupCloseListeners(addBookForm, closeBookForm);
+            setupPopupCloseListeners(confirmWindow, cancelDelete);
 
         addBookButton.addEventListener('click', () => {
-            const placeholders = generateRandomPlaceholder();
-            console.log(placeholders)
+            console.log("Add Book button clicked!");
 
+            const { formBookTitle, formBookAuthor } = displayObjects.bookForm.bookInfo;
+            const placeholders = generateRandomPlaceholder();
+            
             formBookTitle.setAttribute('placeholder', placeholders.title)
             formBookAuthor.setAttribute('placeholder', placeholders.author)
 
@@ -401,80 +441,78 @@ function DisplayController(data) {
     // then add a listener to DataController()
     // This is a lot of work though so I'm saving it second-to-last
     bookInputForm.addEventListener('submit', (event) => {
-        const inputForm = document.querySelector('#addBookMenu');
-
+        const inputForm = displayObjects.bookForm.bookInputForm;
         event.preventDefault();
-        submitBookButton.disabled = true;
+
+        displayObjects.bookForm.submitBook.disabled = true;
+
+        const { formBookTitle, formBookAuthor,
+            formBookPages, formBookGenre,
+            formBookStatus
+        } = displayObjects.bookForm.bookInfo;
         
         const title = formBookTitle.value,
         author = formBookAuthor.value,
         pages = Number(formBookPages.value),
+        genre = formBookGenre.value,
         readStatus = formBookStatus.checked;
 
         if (appState.editingBook) {
-            
-            updateBookInLibrary(myBooks, appState.idToEdit,
-                title, author, pages, readStatus
+            const library = data.getBooks();
+            const bookToUpdate = library.find(
+                book => book.id === appState.idToEdit);
+
+            bookToUpdate.updateInfo(title, author, pages,
+                genre, readStatus
             );
 
-            const bookIndex = myBooks.findIndex(book => book.id === appState.idToEdit);
-            const updatedBook = myBooks[bookIndex];
-
-            const existingBookItem = document.querySelector(`[data-id="${appState.idToEdit}"]`);
-
-            if (existingBookItem && updatedBook) {
-                modifyBookItemInfo(existingBookItem, updatedBook);
-            }
-            
             appState.editingBook = false;
             appState.idToEdit = null;
-
-            updateBookStats(myBooks);
-
         } else {
-            addBookToLibrary(myBooks, title, author,
-                pages, readStatus);
-                
-            loadBookIntoShelf(myBooks[myBooks.length - 1])
+            data.addBook(title, author, pages, 
+                readStatus, genre);
         }
         
-        submitBookButton.disabled = false;
+        displayObjects.bookForm.submitBook.disabled = false;;
         inputForm.style.display = 'none';
 
-        bookInputForm.reset();
+        bookInputForm.classList.remove('visible')
     });
 
-    // TODO: dispatch event-book-requested and delete-book-requested  
-    bookshelfContainer.addEventListener('click', (event) => {
+    displayObjects.bookshelfContainer.addEventListener('click', (event) => {
         const trashButton = event.target.closest('.trashBook');
         const editButton = event.target.closest('.modifyBook');
             
         if (trashButton) {
-            const bookToDelete = data.getBooks().find(
-                b => b.id === editButtonButton.dataset.targetID);
-            showPopup(confirmWindow); 
+            appState.idToDelete = trashButton.dataset.targetID;
+            showPopup(displayObjects.confirmDeleteModal); 
         }
 
         if (editButton) {
+            appState.idToEdit = editButton.dataset.targetID;
+            appState.editingBook = true;
+
             const bookToEdit = data.getBooks().find(
                 b => b.id === editButton.dataset.targetID
             );
             
-            grabBookDetails(bookToEdit);
+            grabBookDetails(appState.idToEdit);
             
-            showPopup(addBookForm);
+            showPopup(displayObjects.bookForm.bookInputForm);
         }
     });
 
-    confirmWindow.addEventListener('submit', (e) => { 
+    displayObjects.confirmDeleteModal.addEventListener('submit', (e) => { 
         e.preventDefault(); 
         
-        if (bookToDelete) {
-            data.removeBook(bookToDelete)
+        if (appState.idToDelete) {
+            data.removeBook(appState.idToDelete);
         }
 
-        confirmWindow.style.display = 'none'; 
+        displayObjects.confirmDeleteModal.style.display = 'none'; 
     });
+
+    return {displayObjects}
 }
 
 const data = DataController();
