@@ -300,6 +300,10 @@ table::before {
   background-color: rgba(0, 0, 0, 0.5);
 }
 
+.visible {
+  display: block !important;
+}
+
 .popupContent {
   background-color: #fefefe;
   margin: 15% auto; /* 15% from the top and centered */
