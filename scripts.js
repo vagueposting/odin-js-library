@@ -1,7 +1,6 @@
-// 2025-11-17 2:50 GMT +8
-// FIXME: Bug where clicking "close" and "submit" both
-// FIXME: Bug in editing screen where clicking "submit" renders 
-// a new book
+// 2025-11-19 13:50 GMT +8
+// Completed application refactor
+// TODO: Add "sort" feature to DisplayController()
 
 let appState = {
     idToDelete: null,
@@ -13,7 +12,8 @@ function DataController() {
     const myBooks = [];
 
     class Book {
-    constructor(title, author, pages, readStatus, genre) {
+    constructor({ title, author, pages, 
+        readStatus, genre }) {
     this.title = title;
     this.author = author;
     this.pages = pages;
@@ -22,12 +22,13 @@ function DataController() {
     this.readStatus = Boolean(readStatus);
     }
 
-    updateInfo(newTitle, newAuthor, newPages, newGenre, newReadStatus) {
-        this.title = newTitle;
-        this.author = newAuthor;
-        this.pages = newPages;
-        this.genre = newGenre;
-        this.readStatus = newReadStatus;
+    updateInfo({ title, author, 
+        pages, genre, readStatus }) {
+        this.title = title;
+        this.author = author;
+        this.pages = pages;
+        this.genre = genre;
+        this.readStatus = readStatus;
 
 
         updateBookStats();
@@ -47,10 +48,10 @@ function DataController() {
      * @param {Number} pages - # of pages
      * @param {Boolean} readStatus - has the book been completed?
      */
-    function addBookToLibrary(title, 
+    function addBookToLibrary({ title, 
         author, pages, 
-        readStatus, genre) {
-        const newBook = new Book(title, author, pages, readStatus, genre)
+        readStatus, genre }) {
+        const newBook = new Book({title, author, pages, readStatus, genre})
         myBooks.push(newBook)
         updateBookStats();
 
@@ -126,7 +127,9 @@ function DisplayController(data) {
         },
         bookForm: {
             // Controls
-            bookInputForm: document.querySelector('#addBookMenu'),
+            addBookMenu: document.querySelector('#addBookMenu'),
+            // the true form
+            inputForm: document.querySelector('#bookInputForm'),
             addBook: document.querySelector('#addBook'),
             closeBookForm: document.querySelector('#closeAddBookForm'),
             submitBook: document.querySelector('#submitBook'),
@@ -141,8 +144,6 @@ function DisplayController(data) {
         },
         confirmDeleteModal: document.querySelector('#confirmBookDeletion')
     };
-
-    console.log('Add Book Button Element:', displayObjects.bookForm.addBook);
 
     /** 
      * Gets the information of a "book" and modifies its 
@@ -311,7 +312,8 @@ function DisplayController(data) {
      */
     function setupPopupCloseListeners(divPopup, closeButton) {
         // Close button listener
-        closeButton.addEventListener('click', () => {
+        closeButton.addEventListener('click', (e) => {
+            e.preventDefault();
             divPopup.classList.remove('visible');
         });
 
@@ -411,9 +413,7 @@ function DisplayController(data) {
         }
     })
     document.addEventListener('DOMContentLoaded', () => {
-            console.log("DOMContentLoaded block executed.");
-
-            const addBookForm = displayObjects.bookForm.bookInputForm; 
+            const addBookForm = displayObjects.bookForm.addBookMenu; 
             const closeBookForm = displayObjects.bookForm.closeBookForm;
             const confirmWindow = displayObjects.confirmDeleteModal;
             const addBookButton = displayObjects.bookForm.addBook;
@@ -424,8 +424,6 @@ function DisplayController(data) {
             setupPopupCloseListeners(confirmWindow, cancelDelete);
 
         addBookButton.addEventListener('click', () => {
-            console.log("Add Book button clicked!");
-
             const { formBookTitle, formBookAuthor } = displayObjects.bookForm.bookInfo;
             const placeholders = generateRandomPlaceholder();
             
@@ -436,12 +434,7 @@ function DisplayController(data) {
         });
     });
 
-    // The actual book input form
-    // TODO: turn this into a pure event dispatcher,
-    // then add a listener to DataController()
-    // This is a lot of work though so I'm saving it second-to-last
-    bookInputForm.addEventListener('submit', (event) => {
-        const inputForm = displayObjects.bookForm.bookInputForm;
+    displayObjects.bookForm.addBookMenu.addEventListener('submit', (event) => {
         event.preventDefault();
 
         displayObjects.bookForm.submitBook.disabled = true;
@@ -451,32 +444,35 @@ function DisplayController(data) {
             formBookStatus
         } = displayObjects.bookForm.bookInfo;
         
-        const title = formBookTitle.value,
-        author = formBookAuthor.value,
-        pages = Number(formBookPages.value),
-        genre = formBookGenre.value,
-        readStatus = formBookStatus.checked;
-
+        const newBookData = {
+            title: formBookTitle.value,
+            author: formBookAuthor.value,
+            pages: Number(formBookPages.value),
+            genre: formBookGenre.value,
+            readStatus: formBookStatus.checked
+        };
+        
         if (appState.editingBook) {
             const library = data.getBooks();
             const bookToUpdate = library.find(
                 book => book.id === appState.idToEdit);
 
-            bookToUpdate.updateInfo(title, author, pages,
-                genre, readStatus
-            );
+            bookToUpdate.updateInfo(newBookData);
 
             appState.editingBook = false;
             appState.idToEdit = null;
-        } else {
-            data.addBook(title, author, pages, 
-                readStatus, genre);
+
+            displayObjects.bookForm.addBookMenu.classList.remove('visible')
+            return;
         }
         
-        displayObjects.bookForm.submitBook.disabled = false;;
-        inputForm.style.display = 'none';
+        
+        data.addBook(newBookData);
+        
+        displayObjects.bookForm.submitBook.disabled = false;
 
-        bookInputForm.classList.remove('visible')
+        displayObjects.bookForm.addBookMenu.classList.remove('visible');
+        displayObjects.bookForm.inputForm.reset();
     });
 
     displayObjects.bookshelfContainer.addEventListener('click', (event) => {
@@ -498,7 +494,7 @@ function DisplayController(data) {
             
             grabBookDetails(appState.idToEdit);
             
-            showPopup(displayObjects.bookForm.bookInputForm);
+            showPopup(displayObjects.bookForm.addBookMenu);
         }
     });
 
@@ -509,7 +505,7 @@ function DisplayController(data) {
             data.removeBook(appState.idToDelete);
         }
 
-        displayObjects.confirmDeleteModal.style.display = 'none'; 
+        displayObjects.confirmDeleteModal.classList.remove('visible'); 
     });
 
     return {displayObjects}
