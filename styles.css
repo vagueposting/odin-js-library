@@ -85,6 +85,7 @@ button {
   flex-direction: column;
   align-items: center;
   gap: 1.50rem;
+  position: relative;
 
   background-color: transparent;
   color: var(--06);
@@ -189,9 +190,10 @@ button {
 
 /* Table Style */
 .bookStats {
-  position: relative;
-  top: 3rem;
-  left: calc(2% + 25px);
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: auto;
   background-image:
     linear-gradient(
       to bottom,
