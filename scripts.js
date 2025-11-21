@@ -107,11 +107,47 @@ function DataController() {
             });
 
             document.dispatchEvent(statsUpdated);
-        }
+    }
+
+    /**
+     * Creates a new array by sorting through the original myBooks array
+     * @param {string} criteria - The book property to sort with
+     * @param {string} direction - 'asc' for ascending, 'desc' for descending 
+     * @returns {Array} The sorted myBooks array
+     */
+    function sortBooks(criteria, direction = 'asc') {
+        const sortedBooks = getBooks();
+
+        sortedBooks.sort((a,b) => {
+            let aValue = a[criteria];
+            let bValue = b[criteria];
+
+            if (typeof aValue === 'string') {
+                aValue = aValue.toLowerCase();
+                bValue = bValue.toLowerCase();
+            }
+
+            if (aValue < bValue) {
+                return direction === 'asc' ? -1 : 1;
+            }
+            if (aValue > bValue) {
+                return direction === 'asc' ? 1 : -1;
+            }
+            return 0;
+        })
+
+        const booksSorted = new CustomEvent('books-sorted', {
+            detail: sortedBooks
+        });
+        document.dispatchEvent(booksSorted)
+
+        return sortedBooks;
+    }
 
     return { getBooks,
         addBook: addBookToLibrary,
-        removeBook: removeBookFromLibrary
+        removeBook: removeBookFromLibrary,
+        sortBooks
      }
 }
 
@@ -125,11 +161,19 @@ function DisplayController(data) {
             uniqueAuthors: document.querySelector('#uniqueAuthors'),
             readBookCount: document.querySelector('#readBookCount')
         },
+        sortBooks: {
+            sortBook: document.querySelector('#sortBooks'),
+            sortBookMenu: document.querySelector('#sortBookMenu'),
+            sortCriteria: document.querySelector('#sortCriteria'),
+            closeSortForm: document.querySelector('#closeSortForm'),
+            submitSort: document.querySelector('#submitSort')
+        },
         bookForm: {
             // Controls
             addBookMenu: document.querySelector('#addBookMenu'),
             // the true form
             inputForm: document.querySelector('#bookInputForm'),
+            // button
             addBook: document.querySelector('#addBook'),
             closeBookForm: document.querySelector('#closeAddBookForm'),
             submitBook: document.querySelector('#submitBook'),
@@ -344,6 +388,12 @@ function DisplayController(data) {
         }
     }
 
+    function renderBookshelf(library) {
+        displayObjects.bookshelfContainer.innerHTML = '';
+
+        library.forEach(book => loadBookIntoShelf(book));
+    } 
+
     function generateRandomPlaceholder() {
         const placeholderOptions = [
             {
@@ -413,24 +463,33 @@ function DisplayController(data) {
         }
     })
     document.addEventListener('DOMContentLoaded', () => {
-            const addBookForm = displayObjects.bookForm.addBookMenu; 
-            const closeBookForm = displayObjects.bookForm.closeBookForm;
-            const confirmWindow = displayObjects.confirmDeleteModal;
-            const addBookButton = displayObjects.bookForm.addBook;
-            
-            const cancelDelete = document.getElementById('cancelDelete');
 
-            setupPopupCloseListeners(addBookForm, closeBookForm);
+            const { addBookMenu,
+                closeBookForm, addBook } = displayObjects.bookForm;
+
+            const confirmWindow = displayObjects.confirmDeleteModal,
+            cancelDelete = document.getElementById('cancelDelete');
+
+            const { sortBookMenu, sortBook,
+                closeSortForm
+            } = displayObjects.sortBooks;
+
+            setupPopupCloseListeners(addBookMenu, closeBookForm);
             setupPopupCloseListeners(confirmWindow, cancelDelete);
+            setupPopupCloseListeners(sortBookMenu, closeSortForm);
 
-        addBookButton.addEventListener('click', () => {
+        addBook.addEventListener('click', () => {
             const { formBookTitle, formBookAuthor } = displayObjects.bookForm.bookInfo;
             const placeholders = generateRandomPlaceholder();
             
             formBookTitle.setAttribute('placeholder', placeholders.title)
             formBookAuthor.setAttribute('placeholder', placeholders.author)
 
-            showPopup(addBookForm);
+            showPopup(addBookMenu);
+        });
+
+        sortBook.addEventListener('click', () => {
+            showPopup(sortBookMenu);
         });
     });
 
@@ -498,6 +557,23 @@ function DisplayController(data) {
         }
     });
 
+    document.addEventListener('books-sorted', (e) => {
+        renderBookshelf(e.detail)
+    });
+
+    displayObjects.sortBooks.sortBookMenu.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const { sortCriteria } = displayObjects.sortBooks;
+        
+        // Assuming you add a sortDirection input and get it here:
+        // const sortDirection = document.querySelector('#sortDirection'); // <-- You need to define and select this in displayObjects
+
+        data.sortBooks(sortCriteria.value, 'asc'); 
+        
+        displayObjects.sortBooks.sortBookMenu.classList.remove('visible');
+    })
+
     displayObjects.confirmDeleteModal.addEventListener('submit', (e) => { 
         e.preventDefault(); 
         
@@ -513,3 +589,82 @@ function DisplayController(data) {
 
 const data = DataController();
 DisplayController(data);
+
+// ASSUMPTION: 'data' (the DataController return object) is accessible here.
+// Example: const data = DataController(); 
+
+// --- Test Library Books: Directly using data.addBook() ---
+
+// 1. Science Fiction (Read)
+data.addBook({
+    title: "Dune", 
+    author: "Frank Herbert", 
+    pages: 412, 
+    readStatus: true, 
+    genre: "Science Fiction"
+});
+
+// 2. Fantasy (Unread)
+data.addBook({
+    title: "Mistborn: The Final Empire", 
+    author: "Brandon Sanderson", 
+    pages: 671, 
+    readStatus: false, 
+    genre: "Fantasy"
+});
+
+// 3. Classic Literature (Read)
+data.addBook({
+    title: "Pride and Prejudice", 
+    author: "Jane Austen", 
+    pages: 279, 
+    readStatus: true, 
+    genre: "Classic"
+});
+
+// 4. Non-Fiction / Self-Help (Read)
+data.addBook({
+    title: "Atomic Habits", 
+    author: "James Clear", 
+    pages: 320, 
+    readStatus: true, 
+    genre: "Non-Fiction"
+});
+
+// 5. Thriller (Unread)
+data.addBook({
+    title: "The Silent Patient", 
+    author: "Alex Michaelides", 
+    pages: 336, 
+    readStatus: false, 
+    genre: "Thriller"
+});
+
+// 6. Young Adult / Fantasy (Read)
+data.addBook({
+    title: "Harry Potter and the Sorcerer's Stone", 
+    author: "J.K. Rowling", 
+    pages: 309, 
+    readStatus: true, 
+    genre: "Young Adult"
+});
+
+// 7. Graphic Novel / Comics (Unread)
+data.addBook({
+    title: "Watchmen", 
+    author: "Alan Moore", 
+    pages: 416, 
+    readStatus: false, 
+    genre: "Graphic Novel"
+});
+
+// 8. Epic Fantasy (Longest book, Read)
+data.addBook({
+    title: "The Way of Kings", 
+    author: "Brandon Sanderson", 
+    pages: 1007, 
+    readStatus: true, 
+    genre: "Fantasy"
+});
+
+console.log(`Test library populated with ${data.getBooks().length} books.`);
