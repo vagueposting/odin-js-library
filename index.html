@@ -83,13 +83,15 @@
                         size="2" />
                 </li>
                 <li><label for="bookGenre">Genre:</label>
-                    <input type="text" 
-                    id="bookGenre" 
-                    name="bookGenre" 
-                    required="required" 
-                    minlength="3" 
-                    maxlength="24"
-                    size="24">
+                    <select name="bookGenre" id="bookGenre">
+                        <option value="Mystery">Mystery</option>
+                        <option value="Thriller">Thriller</option>
+                        <option value="Sci-Fi">Sci-Fi</option>
+                        <option value="Fantasy">Fantasy</option>
+                        <option value="Romance">Romance</option>
+                        <option value="History">History</option>
+                        <option value="Non-Fiction">Non-Fiction</option>
+                    </select>
                 </li>
                 <li><label for="bookStatus">Read?</label>
                     <input type="checkbox"
@@ -108,16 +110,36 @@
         <form class="popupContent">
             <ul>
                 <li>
-                    <label for="sortCriteria">Sort books by:</label>
-                    <select name="sortCriteria" id="sortCriteria">
-                        <option value="title">Title</option>
-                        <option value="author">Author</option>
-                        <option value="pages">pages</option>
-                        <option value="genre">Genre</option>
-                        <option value="bookStatus">Read Status</option>
-                    </select>
+                    <label for="shouldSort">Sort?</label>
+                    <input type="checkbox" id="shouldSort" name="shouldSort">
                 </li>
             </ul>
+            
+            <fieldset disabled>
+                <ul>
+                    <li>
+                        <label for="sortCriteria">Sort books by:</label>
+                        <select name="sortCriteria" id="sortCriteria">
+                            <option value="title">Title</option>
+                            <option value="author">Author</option>
+                            <option value="pages">Pages</option>
+                            <option value="genre">Genre</option>
+                            <option value="bookStatus">Read Status</option>
+                        </select>
+                    </li>
+                </ul>
+                <ul>
+                    <li>
+                        <label for="asc">Asc</label>
+                        <input type="radio" id="sortAsc" name="sortOrder" value="asc" checked>
+                    </li>
+
+                    <li>
+                        <label for="desc">Desc</label>
+                        <input type="radio" id="sortDesc" name="sortOrder" value="desc">
+                    </li>
+                </ul>
+            </fieldset>
             <div class="popupControls">
                 <button id="closeSortForm" class="popupButton">Close</button>
                 <button type="submit" id="submitSort" class="popupButton">Submit</button>

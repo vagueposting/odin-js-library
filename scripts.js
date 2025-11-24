@@ -1,11 +1,17 @@
-// 2025-11-19 13:50 GMT +8
-// Completed application refactor
-// TODO: Add "sort" feature to DisplayController()
+// 2025-11-24 10:54 GMT +8
+// Sort feature mostly added :)
 
-let appState = {
+const appState = {
     idToDelete: null,
     idToEdit: null,
-    editingBook: false
+    editingBook: false,
+    processOption: {
+        doSort: false,
+        sortCriteria: 'title',
+        sortDirection: 'asc',
+        doFilter: false,
+        filterCriteria: {}
+    }
 };
 
 function DataController() {
@@ -46,6 +52,7 @@ function DataController() {
      * @param {String} title - book title
      * @param {String} author - book author
      * @param {Number} pages - # of pages
+     * @param {String} genre - book genre provided by dropdown
      * @param {Boolean} readStatus - has the book been completed?
      */
     function addBookToLibrary({ title, 
@@ -83,9 +90,91 @@ function DataController() {
         return false;
     }
 
+        /**
+     * Creates a new array by sorting through the original myBooks array
+     * @param {string} criteria - The book property to sort with
+     * @param {string} direction - 'asc' for ascending, 'desc' for descending 
+     * @returns {Array} The sorted myBooks array
+     */
+    function _sort(books, criteria, direction = 'asc') {
+        const sortedBooks = [...books];
+
+        sortedBooks.sort((a,b) => {
+            let aValue = a[criteria];
+            let bValue = b[criteria];
+
+            if (typeof aValue === 'string') {
+                aValue = aValue.toLowerCase();
+                bValue = bValue.toLowerCase();
+            }
+
+            if (aValue < bValue) {
+                return direction === 'asc' ? -1 : 1;
+            }
+            if (aValue > bValue) {
+                return direction === 'asc' ? 1 : -1;
+            }
+            return 0;
+        })
+
+        return sortedBooks;
+    }
+
+    function _filter(books, criteria) { 
+        const activeCriteria = Object.entries(criteria);
+
+        if (activeCriteria.length === 0) {
+            return books;
+        }
+
+        return books.filter(book => {
+            return activeCriteria.every(([key, value]) => {
+                // filter for Booleans and strings
+                if (book[key] === value) {
+                    return true;
+                }
+
+                // page count filters
+                if (key === 'minPages' && book.pages >= value) {
+                    return true;
+                }
+                if (key === 'maxPages' && book.pages <= value) {
+                    return true;
+                }
+
+                return false;
+            });
+        });
+    };
+
     function getBooks() {
         return [...myBooks]
     }
+
+    function getProcessedBooks({
+        doSort = false,
+        sortCriteria = 'title',
+        sortDirection = 'asc',
+        doFilter = false,
+        filterCriteria = {}} = {}) {
+            let result = getBooks();
+
+            // 1. Filter the library copy
+            if (doFilter) {
+                result = _filter(result, filterCriteria)
+            };
+
+            if (doSort) {
+                result = _sort(result, sortCriteria, sortDirection);
+            };
+
+            const dataUpdated = new CustomEvent('bookshelf-data-updated', {
+                detail: result
+            });
+            document.dispatchEvent(dataUpdated);
+
+            return result;
+        }
 
     function updateBookStats() {
             const libraryStats = {}
@@ -109,45 +198,10 @@ function DataController() {
             document.dispatchEvent(statsUpdated);
     }
 
-    /**
-     * Creates a new array by sorting through the original myBooks array
-     * @param {string} criteria - The book property to sort with
-     * @param {string} direction - 'asc' for ascending, 'desc' for descending 
-     * @returns {Array} The sorted myBooks array
-     */
-    function sortBooks(criteria, direction = 'asc') {
-        const sortedBooks = getBooks();
-
-        sortedBooks.sort((a,b) => {
-            let aValue = a[criteria];
-            let bValue = b[criteria];
-
-            if (typeof aValue === 'string') {
-                aValue = aValue.toLowerCase();
-                bValue = bValue.toLowerCase();
-            }
-
-            if (aValue < bValue) {
-                return direction === 'asc' ? -1 : 1;
-            }
-            if (aValue > bValue) {
-                return direction === 'asc' ? 1 : -1;
-            }
-            return 0;
-        })
-
-        const booksSorted = new CustomEvent('books-sorted', {
-            detail: sortedBooks
-        });
-        document.dispatchEvent(booksSorted)
-
-        return sortedBooks;
-    }
-
     return { getBooks,
+        getProcessedBooks,
         addBook: addBookToLibrary,
         removeBook: removeBookFromLibrary,
-        sortBooks
      }
 }
 
@@ -164,7 +218,11 @@ function DisplayController(data) {
         sortBooks: {
             sortBook: document.querySelector('#sortBooks'),
             sortBookMenu: document.querySelector('#sortBookMenu'),
+            sortDetails: document.querySelector('#sortBookMenu fieldset'),
+            shouldSort: document.querySelector('#shouldSort'),
             sortCriteria: document.querySelector('#sortCriteria'),
+            sortAsc: document.querySelector('#sortAsc'),
+            sortDesc: document.querySelector('#sortDesc'),
             closeSortForm: document.querySelector('#closeSortForm'),
             submitSort: document.querySelector('#submitSort')
         },
@@ -521,6 +579,7 @@ function DisplayController(data) {
             appState.editingBook = false;
             appState.idToEdit = null;
 
+            displayObjects.bookForm.submitBook.disabled = false;
             displayObjects.bookForm.addBookMenu.classList.remove('visible')
             return;
         }
@@ -561,15 +620,24 @@ function DisplayController(data) {
         renderBookshelf(e.detail)
     });
 
+    displayObjects.sortBooks.shouldSort.addEventListener('change', (e) => {
+        const { sortDetails, shouldSort } = displayObjects.sortBooks;
+
+        sortDetails.disabled = !shouldSort.checked;
+    })
+
     displayObjects.sortBooks.sortBookMenu.addEventListener('submit', (e) => {
         e.preventDefault();
 
-        const { sortCriteria } = displayObjects.sortBooks;
-        
-        // Assuming you add a sortDirection input and get it here:
-        // const sortDirection = document.querySelector('#sortDirection'); // <-- You need to define and select this in displayObjects
+        const { sortCriteria, sortDetails, sortAsc } = displayObjects.sortBooks;
 
-        data.sortBooks(sortCriteria.value, 'asc'); 
+        if (sortDetails.disabled) {
+            const originalLibrary = data.getBooks();
+            renderBookshelf(originalLibrary);
+        } else {
+            const sortDir = sortAsc.checked ? 'asc' : 'desc';
+            data.sortBooks(sortCriteria.value, sortDir);
+        } 
         
         displayObjects.sortBooks.sortBookMenu.classList.remove('visible');
     })
@@ -601,7 +669,7 @@ data.addBook({
     author: "Frank Herbert", 
     pages: 412, 
     readStatus: true, 
-    genre: "Science Fiction"
+    genre: "Sci-Fi"
 });
 
 // 2. Fantasy (Unread)
@@ -619,7 +687,7 @@ data.addBook({
     author: "Jane Austen", 
     pages: 279, 
     readStatus: true, 
-    genre: "Classic"
+    genre: "Romance"
 });
 
 // 4. Non-Fiction / Self-Help (Read)
@@ -646,7 +714,7 @@ data.addBook({
     author: "J.K. Rowling", 
     pages: 309, 
     readStatus: true, 
-    genre: "Young Adult"
+    genre: "Fantasy"
 });
 
 // 7. Graphic Novel / Comics (Unread)
@@ -655,7 +723,7 @@ data.addBook({
     author: "Alan Moore", 
     pages: 416, 
     readStatus: false, 
-    genre: "Graphic Novel"
+    genre: "Science-Fi"
 });
 
 // 8. Epic Fantasy (Longest book, Read)
