@@ -5,7 +5,7 @@ const appState = {
     idToDelete: null,
     idToEdit: null,
     editingBook: false,
-    processOption: {
+    processOptions: {
         doSort: false,
         sortCriteria: 'title',
         sortDirection: 'asc',
@@ -129,6 +129,11 @@ function DataController() {
 
         return books.filter(book => {
             return activeCriteria.every(([key, value]) => {
+                if (typeof value === 'string' && 
+                    (key === 'title' || key === 'author')) {
+                    return book[key].toLowerCase().includes(value.toLowerCase());
+                }
+
                 // filter for Booleans and strings
                 if (book[key] === value) {
                     return true;
@@ -225,6 +230,22 @@ function DisplayController(data) {
             sortDesc: document.querySelector('#sortDesc'),
             closeSortForm: document.querySelector('#closeSortForm'),
             submitSort: document.querySelector('#submitSort')
+        },
+        filterBooks: {
+            filterBook: document.querySelector('#filterBooks'),
+            filterBookMenu: document.querySelector('#filterBookMenu'),
+            closeFilterForm: document.querySelector('#closeFilterForm'),
+            clearFiltersButton: document.querySelector('#clearFiltersButton'),
+            submitFilter: document.querySelector('#submitFilter'),
+            info: {
+                searchTitle: document.querySelector('#searchTitle'),
+                searchAuthor: document.querySelector('#searchAuthor'),
+                searchPages: document.querySelector('#searchPages'),
+                pagesBelow: document.querySelector('#pagesBelow'),
+                pagesAbove: document.querySelector('#pagesAbove'),
+                searchGenre: document.querySelector('#searchGenre'),
+                searchBookStatus: document.querySelector('#searchBookStatus')
+            }
         },
         bookForm: {
             // Controls
@@ -450,7 +471,12 @@ function DisplayController(data) {
         displayObjects.bookshelfContainer.innerHTML = '';
 
         library.forEach(book => loadBookIntoShelf(book));
-    } 
+    }
+    
+    function refreshBookshelf() {
+        const processedBooks = data.getProcessedBooks(appState.processOptions);
+        renderBookshelf(processedBooks);
+    }
 
     function generateRandomPlaceholder() {
         const placeholderOptions = [
@@ -488,7 +514,7 @@ function DisplayController(data) {
 
     // Event listeners galore...
     document.addEventListener('book-added', (e) => {
-        loadBookIntoShelf(e.detail);
+        refreshBookshelf();
     });
 
     document.addEventListener('book-info-updated', (e) => {
@@ -519,7 +545,14 @@ function DisplayController(data) {
         if (bookCard) {
             bookCard.remove();
         }
+
+        refreshBookshelf();
+    });
+
+    document.addEventListener('bookshelf-data-updated', (e) => {
+        renderBookshelf(e.detail);
     })
+
     document.addEventListener('DOMContentLoaded', () => {
 
             const { addBookMenu,
@@ -532,9 +565,13 @@ function DisplayController(data) {
                 closeSortForm
             } = displayObjects.sortBooks;
 
+            const { filterBook, filterBookMenu, 
+                closeFilterForm } = displayObjects.filterBooks;
+
             setupPopupCloseListeners(addBookMenu, closeBookForm);
             setupPopupCloseListeners(confirmWindow, cancelDelete);
             setupPopupCloseListeners(sortBookMenu, closeSortForm);
+            setupPopupCloseListeners(filterBookMenu, closeFilterForm)
 
         addBook.addEventListener('click', () => {
             const { formBookTitle, formBookAuthor } = displayObjects.bookForm.bookInfo;
@@ -548,6 +585,10 @@ function DisplayController(data) {
 
         sortBook.addEventListener('click', () => {
             showPopup(sortBookMenu);
+        });
+
+        filterBook.addEventListener('click', () => {
+            showPopup(filterBookMenu);
         });
     });
 
@@ -605,10 +646,6 @@ function DisplayController(data) {
         if (editButton) {
             appState.idToEdit = editButton.dataset.targetID;
             appState.editingBook = true;
-
-            const bookToEdit = data.getBooks().find(
-                b => b.id === editButton.dataset.targetID
-            );
             
             grabBookDetails(appState.idToEdit);
             
@@ -624,23 +661,80 @@ function DisplayController(data) {
         const { sortDetails, shouldSort } = displayObjects.sortBooks;
 
         sortDetails.disabled = !shouldSort.checked;
-    })
+
+        appState.processOptions.doSort = shouldSort.checked;
+
+        if (!shouldSort.checked) {
+            refreshBookshelf();
+        }
+    });
 
     displayObjects.sortBooks.sortBookMenu.addEventListener('submit', (e) => {
         e.preventDefault();
 
-        const { sortCriteria, sortDetails, sortAsc } = displayObjects.sortBooks;
+        const { sortCriteria, sortAsc } = displayObjects.sortBooks;
+        
+        appState.processOptions.sortCriteria = sortCriteria.value;
+        appState.processOptions.sortDirection = sortAsc.checked ? 'asc' : 'desc';
 
-        if (sortDetails.disabled) {
-            const originalLibrary = data.getBooks();
-            renderBookshelf(originalLibrary);
-        } else {
-            const sortDir = sortAsc.checked ? 'asc' : 'desc';
-            data.sortBooks(sortCriteria.value, sortDir);
-        } 
+        refreshBookshelf(); 
         
         displayObjects.sortBooks.sortBookMenu.classList.remove('visible');
-    })
+    });
+
+    displayObjects.filterBooks.filterBookMenu.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const filterInfo = displayObjects.filterBooks.info;
+        const newFilterCriteria = {};
+        
+        
+        if (filterInfo.searchTitle.value) {
+            newFilterCriteria.title = filterInfo.searchTitle.value; 
+        }
+        
+        if (filterInfo.searchAuthor.value) {
+            newFilterCriteria.author = filterInfo.searchAuthor.value;
+        }
+        
+        const pagesValue = Number(filterInfo.searchPages.value);
+        if (pagesValue > 0) {
+            if (filterInfo.pagesAbove.checked) {
+                newFilterCriteria.minPages = pagesValue; 
+            } else {
+                newFilterCriteria.maxPages = pagesValue;
+            }
+        }
+        
+        if (filterInfo.searchGenre.value) {
+            newFilterCriteria.genre = filterInfo.searchGenre.value;
+        }
+        
+        if (filterInfo.searchBookStatus.checked) {
+            newFilterCriteria.readStatus = true;
+        }
+        
+        const isFilteringActive = Object.keys(newFilterCriteria).length > 0;
+
+        appState.processOptions.doFilter = isFilteringActive;
+        appState.processOptions.filterCriteria = newFilterCriteria;
+        
+        refreshBookshelf(); 
+        
+        displayObjects.filterBooks.filterBookMenu.classList.remove('visible');
+    });
+
+    displayObjects.filterBooks.clearFiltersButton.addEventListener('click', () => {
+        const filterForm = displayObjects.filterBooks.filterBookMenu.querySelector('form');
+        filterForm.reset();
+        
+        appState.processOptions.doFilter = false;
+        appState.processOptions.filterCriteria = {};
+        
+        refreshBookshelf(); 
+        
+        displayObjects.filterBooks.filterBookMenu.classList.remove('visible');
+    });
 
     displayObjects.confirmDeleteModal.addEventListener('submit', (e) => { 
         e.preventDefault(); 

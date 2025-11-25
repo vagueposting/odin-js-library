@@ -20,6 +20,8 @@
 
         <button id="sortBooks"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>sort</title><path d="M18 21L14 17H17V7H14L18 3L22 7H19V17H22M2 19V17H12V19M2 13V11H9V13M2 7V5H6V7H2Z" /></svg>Sort</button>
 
+        <button id="filterBooks"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>filter</title><path d="M14,12V19.88C14.04,20.18 13.94,20.5 13.71,20.71C13.32,21.1 12.69,21.1 12.3,20.71L10.29,18.7C10.06,18.47 9.96,18.16 10,17.87V12H9.97L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3V3H19V3C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L14.03,12H14Z" /></svg> Filter</button>
+
         <div class="bookStats">
         <table>
             <tr>
@@ -130,12 +132,12 @@
                 </ul>
                 <ul>
                     <li>
-                        <label for="asc">Asc</label>
+                        <label for="sortAsc">Asc</label>
                         <input type="radio" id="sortAsc" name="sortOrder" value="asc" checked>
                     </li>
 
                     <li>
-                        <label for="desc">Desc</label>
+                        <label for="sortDesc">Desc</label>
                         <input type="radio" id="sortDesc" name="sortOrder" value="desc">
                     </li>
                 </ul>
@@ -145,7 +147,69 @@
                 <button type="submit" id="submitSort" class="popupButton">Submit</button>
             </div>
         </form>
-        </div>
+    </div>
+
+    <div id="filterBookMenu" class="popupOverlay">
+        <form class="popupContent">
+            <ul>
+                <li><label for="searchTitle">Title is</label>
+                    <input
+                    type="text"
+                    id="searchTitle"
+                    name="searchTitle"
+                    minlength="1"
+                    maxlength="32"
+                    size="32" />
+                </li>
+                <li><label for="searchAuthor">Author is</label>
+                    <input
+                    type="text"
+                    id="searchAuthor"
+                    name="searchAuthor"
+                    minlength="1"
+                    maxlength="32"
+                    size="32" />
+                </li>
+                <li><label for="searchPages">Page count is</label>
+                    <label for="pagesAbove">above</label>
+                    <input type="radio" id="pagesAbove" name="pageLimit" value="above" checked>
+
+                    <label for="pagesBelow">below</label>
+                    <input type="radio" id="pagesBelow" name="pageLimit" value="below">
+
+                    <input
+                        type="number"
+                        id="searchPages"
+                        name="searchPages"
+                        min="5"
+                        size="2" />
+                </li>
+                <li><label for="searchGenre">Genre is</label>
+                    <select name="searchGenre" id="searchGenre">
+                        <option value="Mystery">Mystery</option>
+                        <option value="Thriller">Thriller</option>
+                        <option value="Sci-Fi">Sci-Fi</option>
+                        <option value="Fantasy">Fantasy</option>
+                        <option value="Romance">Romance</option>
+                        <option value="History">History</option>
+                        <option value="Non-Fiction">Non-Fiction</option>
+                    </select>
+                </li>
+                <li><label for="searchBookStatus">Read?</label>
+                    <input type="checkbox"
+                    id="searchBookStatus"
+                    name="searchBookStatus">
+                </li>
+            </ul>
+            <div class="popupControls">
+                <button id="closeFilterForm" class="popupButton">Close</button>
+                <button type="button" id="clearFiltersButton" class="popupButton">
+                    Clear Filters
+                </button>
+                <button type="submit" id="submitFilter" class="popupButton">Submit</button>
+            </div>
+        </form>
+    </div>
 
     <div id="confirmBookDeletion" class="popupOverlay">
         <form class="popupContent" style="width: 20%;">
